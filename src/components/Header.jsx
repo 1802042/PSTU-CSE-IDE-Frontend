@@ -1,24 +1,28 @@
 // className={`shadow sticky z-50 top-0 h-20 py-5 ${
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import LoginIcon from "@mui/icons-material/Login";
+import Button from "@mui/material/Button";
 
 const Header = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
 
   const handleLogin = () => {
-    // Implement login logic here
     setIsLoggedIn(true);
+    navigate("/login");
   };
 
   const handleLogout = () => {
     // Implement logout logic here
     setIsLoggedIn(false);
+    navigate("/login");
   };
 
   const toggleMenu = () => {
@@ -47,7 +51,7 @@ const Header = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-2xl font-bold">Knightshade IDE</span>
+              <span className="text-2xl font-bold">PSTU LAB IDE</span>
             </Link>
             <nav className="hidden md:block">
               <ul className="flex space-x-6">
@@ -77,7 +81,7 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/register"
+                    to="/record"
                     className={({ isActive }) =>
                       `${
                         isActive ? "text-purple-400" : ""
@@ -89,7 +93,7 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/pricing"
+                    to="/testing"
                     className={({ isActive }) =>
                       `${
                         isActive ? "text-purple-400" : ""
@@ -179,12 +183,12 @@ const Header = () => {
                     >
                       Profile
                     </NavLink>
-                    <Link
+                    <NavLink
                       to="/settings"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       Settings
-                    </Link>
+                    </NavLink>
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -195,12 +199,15 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <button
+              <Button
+                variant="outlined"
                 onClick={handleLogin}
-                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+                startIcon={<LoginIcon />}
+                className="px-4 py-2  hover:text-white hover:bg-blue-700 rounded"
+                color="primary"
               >
-                Login
-              </button>
+                {"Login"}
+              </Button>
             )}
           </div>
         </div>

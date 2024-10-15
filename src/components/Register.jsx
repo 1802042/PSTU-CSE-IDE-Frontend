@@ -9,6 +9,7 @@ import {
   UserCircleIcon,
   ImageIcon,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
@@ -183,12 +184,12 @@ export default function Register() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{" "}
-            <a
-              href="#"
+            <Link
+              to="/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              Sign in
-            </a>
+              Login Now
+            </Link>
           </p>
         </div>
 

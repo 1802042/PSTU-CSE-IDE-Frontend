@@ -22,7 +22,7 @@ const Footer = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              Knightshade IDE
+              PSTU LAB IDE
             </h2>
             <p className="text-gray-400">
               Empowering developers with cutting-edge tools and a magical coding
@@ -172,7 +172,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>&copy; {currentYear} Knightshade IDE. All rights reserved.</p>
+          <p>&copy; {currentYear} PSTU LAB IDE. All rights reserved.</p>
           <div className="mt-4 space-x-4">
             <Link to="/privacy" className="hover:text-white transition-colors">
               Privacy Policy
