@@ -7,7 +7,8 @@ import Register from "./components/Register.jsx";
 import Record from "./components/Records.jsx";
 import Login from "./components/login.jsx";
 import About from "./components/About.jsx";
-import Test from "./components/Test.jsx";
+import Pricing from "./components/Pricing.jsx";
+// import Test from "./components/Test.jsx";
 
 export default function App() {
   return (
@@ -16,11 +17,12 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="/editor" element={<Ide />} />
         <Route path="/record" element={<Record />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/about" element={<About />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        <Route path="/testing" element={<Test />} />
+        {/* <Route path="/testing" element={<Test />} /> */}
       </Route>
     </Routes>
   );

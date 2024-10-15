@@ -134,7 +134,7 @@ const About = () => {
     name: "MD. Rony Mir",
     email: "rony16@cse.pstu.ac.bd",
     bio: "ICPC Asia West Continental Finalist '2021 | Expert at Codeforces | 5★ at Codechef | Full Stack WebDeveloper | President @CSE Club, PSTU",
-    photo: "../../public/profile.jpeg", // Replace with your photo
+    photo: "/profile.jpeg", // Replace with your photo
   };
 
   const items = [

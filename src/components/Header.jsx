@@ -22,6 +22,7 @@ const Header = () => {
   const handleLogout = () => {
     // Implement logout logic here
     setIsLoggedIn(false);
+    setIsMenuOpen((e) => !e);
     navigate("/login");
   };
 
@@ -93,7 +94,7 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/testing"
+                    to="/pricing"
                     className={({ isActive }) =>
                       `${
                         isActive ? "text-purple-400" : ""
@@ -158,7 +159,7 @@ const Header = () => {
                   className="flex items-center space-x-2 focus:outline-none"
                 >
                   <img
-                    src="https://via.placeholder.com/40"
+                    src="/profile.jpeg"
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full"
                   />
@@ -202,7 +203,7 @@ const Header = () => {
               <Button
                 variant="outlined"
                 onClick={handleLogin}
-                startIcon={<LoginIcon />}
+                endIcon={<LoginIcon />}
                 className="px-4 py-2  hover:text-white hover:bg-blue-700 rounded"
                 color="primary"
               >
