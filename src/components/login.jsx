@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import { cva } from "class-variance-authority";
 import { Label } from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
@@ -10,6 +11,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import debounce from "lodash.debounce";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
@@ -49,16 +51,52 @@ function Input({ className, type, ...props }) {
 }
 
 export default function Login() {
-  const [avatar, setAvatar] = useState(null);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatar(reader.result);
-      };
-      reader.readAsDataURL(file);
+  console.log("Form data:", formData);
+
+  // Load form data from localStorage when the component mounts
+  useEffect(() => {
+    const savedFormData = localStorage.getItem("formData");
+    if (savedFormData) {
+      setFormData(JSON.parse(savedFormData));
+    }
+  }, []);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("formData", JSON.stringify(formData));
+  }, [formData]);
+
+  const debouncedHandleChange = useCallback(
+    debounce((name, value) => {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }, 300),
+    []
+  );
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log("Name:", name, "Value:", value);
+    debouncedHandleChange(name, value);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/api/login", formData);
+      console.log("Login successful:", response.data);
+      // Handle successful login (e.g., redirect to another page)
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Handle login failure (e.g., show error message)
     }
   };
 
@@ -70,7 +108,7 @@ export default function Login() {
           <h2 className="text-3xl font-bold text-white mb-8">
             Log into Your Account
           </h2>
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label
                 htmlFor="username"
@@ -82,7 +120,10 @@ export default function Login() {
                 <UserIcon className="absolute left-3 top-3 h-5 w-5 text-white" />
                 <Input
                   id="username"
+                  name="username"
                   placeholder="Your Username"
+                  value={formData.username}
+                  onChange={handleChange}
                   required
                   className="pl-10"
                 />
@@ -97,8 +138,11 @@ export default function Login() {
                 <MailIcon className="absolute left-3 top-3 h-5 w-5 text-white" />
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Your Email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   className="pl-10"
                 />
@@ -116,15 +160,21 @@ export default function Login() {
                 <LockIcon className="absolute left-3 top-3 h-5 w-5 text-white" />
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Your Password"
+                  value={formData.password}
+                  onChange={handleChange}
                   required
                   className="pl-10"
                 />
               </div>
             </div>
 
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            >
               Login
             </Button>
           </form>

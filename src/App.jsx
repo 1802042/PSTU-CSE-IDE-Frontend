@@ -6,8 +6,8 @@ import Home from "./components/Home.jsx";
 import Register from "./components/Register.jsx";
 import Record from "./components/Records.jsx";
 import Login from "./components/login.jsx";
-import About from "./components/About.jsx";
 import Pricing from "./components/Pricing.jsx";
+import Contact from "./components/Contact.jsx";
 // import Test from "./components/Test.jsx";
 
 export default function App() {
@@ -18,7 +18,7 @@ export default function App() {
         <Route path="/editor" element={<Ide />} />
         <Route path="/record" element={<Record />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
