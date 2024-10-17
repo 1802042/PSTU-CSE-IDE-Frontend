@@ -7,6 +7,29 @@ import Confetti from "react-confetti";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
+const PreviewIde = ({ code }) => (
+  <div className="w-full bg-gray-800 rounded-lg p-2 shadow-2xl h-full">
+    <div className="flex items-center mb-4">
+      <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+      <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+    </div>
+    <div className="bg-gray-900 p-2 rounded overflow-hidden h-full">
+      <SyntaxHighlighter
+        language="cpp"
+        style={dracula}
+        customStyle={{
+          fontSize: "1.1rem",
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  </div>
+);
+
 const Home = () => {
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -131,31 +154,6 @@ public class Main {
         </motion.div>
       </div>
     </section>
-  );
-};
-
-const PreviewIde = ({ code }) => {
-  return (
-    <div className="w-full bg-gray-800 rounded-lg p-2 shadow-2xl h-full">
-      <div className="flex items-center mb-4">
-        <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-        <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-      </div>
-      <div className="bg-gray-900 p-2 rounded overflow-hidden h-full">
-        <SyntaxHighlighter
-          language="cpp"
-          style={dracula}
-          customStyle={{
-            fontSize: "1.1rem",
-            height: "100%",
-            overflow: "hidden",
-          }}
-        >
-          {code}
-        </SyntaxHighlighter>
-      </div>
-    </div>
   );
 };
 

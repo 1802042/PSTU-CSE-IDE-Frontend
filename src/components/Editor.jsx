@@ -1,8 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { Download, Upload, Play } from "lucide-react";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Download, Upload } from "lucide-react";
 import Button from "@mui/material/Button";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
@@ -68,7 +67,130 @@ const editorThemes = [
 
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB
 
-export default function Ide() {
+const Header = ({
+  handleExportCode,
+  handleImportCode,
+  handleRunCode,
+  language,
+  theme,
+  handleLanguageChange,
+  setTheme,
+}) => (
+  <div className="flex items-center justify-between p-4 bg-gray-800">
+    <div className="flex items-center space-x-4 px-4">
+      <div className="flex items-star justify-start space-x-4 px-4">
+        <div>
+          <FolderSpecialIcon className="text-orange-600" />
+          <ChevronRightIcon className="text-orange-600" />
+        </div>
+        <Typography variant="h7" className="text-slate-200 underline">
+          Filename.cpp
+        </Typography>
+      </div>
+
+      <Button
+        variant="outlined"
+        onClick={handleExportCode}
+        startIcon={<Download size={"20"} />}
+        className="px-4 py-2 hover:text-white hover:bg-blue-600 rounded"
+        color="primary"
+      >
+        {"Export"}
+      </Button>
+
+      <Button
+        variant="outlined"
+        onClick={handleImportCode}
+        startIcon={<Upload size={"20"} />}
+        className="px-4 py-2 hover:text-white hover:bg-purple-600 rounded"
+        color="secondary"
+      >
+        {"Import"}
+      </Button>
+
+      <Button
+        variant="outlined"
+        onClick={handleRunCode}
+        startIcon={<PlayCircleIcon />}
+        className="px-4 py-2  hover:text-white hover:bg-green-600 rounded"
+        color="success"
+      >
+        {"Run"}
+      </Button>
+    </div>
+    <div className="flex items-center space-x-4">
+      <select
+        value={language}
+        onChange={handleLanguageChange}
+        className="bg-gray-700 text-white border-gray-600 rounded p-2"
+      >
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+      </select>
+      <select
+        value={theme}
+        onChange={(e) => setTheme(e.target.value)}
+        className="bg-gray-700 text-white border-gray-600 rounded p-2"
+      >
+        {editorThemes.map((t) => (
+          <option key={t} value={t}>
+            {t}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+);
+
+const CodeEditor = ({
+  language,
+  code,
+  theme,
+  handleEditorDidMount,
+  setCode,
+}) => (
+  <Editor
+    height="100%"
+    language={language}
+    value={code}
+    theme={theme}
+    onMount={handleEditorDidMount}
+    onChange={(value) => setCode(value)}
+    options={{
+      minimap: { enabled: true },
+      scrollbar: {
+        vertical: "visible",
+        horizontal: "visible",
+      },
+    }}
+  />
+);
+
+const InputOutputPanel = ({ input, setInput, output }) => (
+  <PanelGroup direction="vertical">
+    <Panel defaultSize={50}>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Enter input here..."
+        className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
+      />
+    </Panel>
+    <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
+    <Panel defaultSize={50}>
+      <textarea
+        value={output}
+        readOnly
+        placeholder="Output will appear here..."
+        className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
+      />
+    </Panel>
+  </PanelGroup>
+);
+
+const Ide = () => {
   const [code, setCode] = useState(languageTemplates.javascript);
   const [language, setLanguage] = useState("javascript");
   const [theme, setTheme] = useState("vs-dark");
@@ -162,137 +284,30 @@ export default function Ide() {
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white px-5 py-2">
-      <div className="flex items-center justify-between p-4 bg-gray-800">
-        <div className="flex items-center space-x-4 px-4">
-          <div className="flex items-star justify-start space-x-4 px-4">
-            <div>
-              <FolderSpecialIcon className="text-orange-600" />
-              <ChevronRightIcon className="text-orange-600" />
-            </div>
-            <Typography variant="h7" className="text-slate-200 underline">
-              Filename.cpp
-            </Typography>
-          </div>
-          {/* <button
-            onClick={handleExportCode}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
-          >
-            <Download className="w-4 h-4 mr-2 inline" />
-            Export
-          </button> */}
-
-          <Button
-            variant="outlined"
-            onClick={handleExportCode}
-            startIcon={<Download size={"20"} />}
-            className="px-4 py-2 hover:text-white hover:bg-blue-600 rounded"
-            color="primary"
-          >
-            {"Export"}
-          </Button>
-
-          {/* <button
-            onClick={handleImportCode}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded"
-          >
-            <Upload className="w-4 h-4 mr-2 inline" />
-            Import
-          </button> */}
-
-          <Button
-            variant="outlined"
-            onClick={handleImportCode}
-            startIcon={<Upload size={"20"} />}
-            className="px-4 py-2 hover:text-white hover:bg-purple-600 rounded"
-            color="secondary"
-          >
-            {"Import"}
-          </Button>
-
-          {/* <button
-            onClick={handleRunCode}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
-          >
-            <Play className="w-4 h-4 mr-2 inline" />
-            Run
-          </button> */}
-          <Button
-            variant="outlined"
-            onClick={handleRunCode}
-            startIcon={<PlayCircleIcon />}
-            className="px-4 py-2  hover:text-white hover:bg-green-600 rounded"
-            color="success"
-          >
-            {"Run"}
-          </Button>
-        </div>
-        <div className="flex items-center space-x-4">
-          <select
-            value={language}
-            onChange={handleLanguageChange}
-            className="bg-gray-700 text-white border-gray-600 rounded p-2"
-          >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="cpp">C++</option>
-          </select>
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            className="bg-gray-700 text-white border-gray-600 rounded p-2"
-          >
-            {editorThemes.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
+      <Header
+        handleExportCode={handleExportCode}
+        handleImportCode={handleImportCode}
+        handleRunCode={handleRunCode}
+        language={language}
+        theme={theme}
+        handleLanguageChange={handleLanguageChange}
+        setTheme={setTheme}
+      />
       <PanelGroup direction="horizontal" className="flex-grow">
         <Panel defaultSize={75}>
-          <Editor
-            height="100%"
+          <CodeEditor
             language={language}
-            value={code}
+            code={code}
             theme={theme}
-            onMount={handleEditorDidMount}
-            onChange={(value) => setCode(value)}
-            options={{
-              minimap: { enabled: true },
-              scrollbar: {
-                vertical: "visible",
-                horizontal: "visible",
-              },
-            }}
+            handleEditorDidMount={handleEditorDidMount}
+            setCode={setCode}
           />
         </Panel>
         <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
         <Panel defaultSize={40}>
-          <PanelGroup direction="vertical">
-            <Panel defaultSize={50}>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter input here..."
-                className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
-              />
-            </Panel>
-            <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
-            <Panel defaultSize={50}>
-              <textarea
-                value={output}
-                readOnly
-                placeholder="Output will appear here..."
-                className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
-              />
-            </Panel>
-          </PanelGroup>
+          <InputOutputPanel input={input} setInput={setInput} output={output} />
         </Panel>
       </PanelGroup>
-
       <input
         type="file"
         ref={fileInputRef}
@@ -302,4 +317,6 @@ export default function Ide() {
       />
     </div>
   );
-}
+};
+
+export default Ide;
