@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { cva } from "class-variance-authority";
 import { Label } from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import { UserIcon, MailIcon, LockIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import AuthContext from "../context/AuthProvider.context.jsx";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "../api/axios.js";
+const LOGIN_URL = "/users/login";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
@@ -33,13 +37,14 @@ const Button = ({ className, variant, size, asChild = false, ...props }) => {
   );
 };
 
-const Input = ({ className, type, ...props }) => (
+const Input = React.forwardRef(({ className, type, ...props }, ref) => (
   <input
     type={type}
     className={`flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    ref={ref}
     {...props}
   />
-);
+));
 
 const FormField = ({
   id,
@@ -51,6 +56,7 @@ const FormField = ({
   placeholder,
   type = "text",
   required = false,
+  inputRef,
 }) => (
   <div className="space-y-2">
     <Label htmlFor={id} className="text-sm font-medium text-white">
@@ -67,6 +73,7 @@ const FormField = ({
         onChange={onChange}
         required={required}
         className="pl-10"
+        ref={inputRef}
       />
     </div>
   </div>
@@ -79,7 +86,13 @@ const Login = () => {
     password: "",
   });
 
+  const { auth, setAuth } = useContext(AuthContext);
+
+  const usernameRef = useRef();
+  const navigate = useNavigate();
+
   useEffect(() => {
+    usernameRef.current.focus();
     const savedFormData = localStorage.getItem("formData");
     if (savedFormData) {
       setFormData(JSON.parse(savedFormData));
@@ -98,20 +111,73 @@ const Login = () => {
     }));
   };
 
+  const clearLocalStorage = () => {
+    localStorage.clear();
+  };
+
+  const fireToast = (message, success) => {
+    success
+      ? toast.success(message, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        })
+      : toast.error(message, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/login", formData);
-      console.log("Login successful:", response.data);
-      // Handle successful login (e.g., redirect to another page)
+      const response = await axios.post(LOGIN_URL, formData, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      fireToast("Login successful!", true);
+      setTimeout(() => {
+        navigate("/");
+        setAuth(response.data);
+      }, 3200);
     } catch (error) {
-      console.error("Login failed:", error);
-      // Handle login failure (e.g., show error message)
+      usernameRef.current.focus();
+      const status = error.response?.data?.status;
+      if (!status) {
+        fireToast("Something Went Wrong!", false);
+      } else if (status == "400") {
+        fireToast("Wrong Input Data Format!", false);
+      } else if (status == "401") {
+        fireToast("Invalid Credentials!", false);
+      } else if (status == "403") {
+        fireToast(
+          "Email Not Verified! Please Verify Email Before Loggin",
+          false
+        );
+      } else if (status == "500") {
+        fireToast("Something Went Wrong When Logging! Try Again!", false);
+      } else {
+        fireToast("Something Went Wrong!", false);
+      }
     }
   };
 
   return (
     <div className="flex flex-col lg:flex-row">
+      <ToastContainer />
       <div className="lg:flex-1 bg-gray-900 text-white p-8 lg:p-16 flex items-center justify-center relative overflow-hidden">
         <div className="w-full max-w-md z-10">
           <h2 className="text-3xl font-bold text-white mb-8">
@@ -127,6 +193,7 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Your Username"
               required
+              inputRef={usernameRef}
             />
             <FormField
               id="email"
