@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../api/axios";
+import useAuth from "../hooks/useAuth";
 
 const REGISTER_URL = "users/register";
 
@@ -176,6 +177,7 @@ export default function Register() {
     password: "",
   });
 
+  const { auth, setAuth } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -206,7 +208,7 @@ export default function Register() {
     success
       ? toast.success(message, {
           position: "top-center",
-          autoClose: 3000,
+          autoClose: 3500,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: false,
@@ -217,7 +219,7 @@ export default function Register() {
         })
       : toast.error(message, {
           position: "top-center",
-          autoClose: 3000,
+          autoClose: 3500,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: false,
@@ -247,8 +249,10 @@ export default function Register() {
         });
 
         fireToast("You have registered successfully!", true);
+        console.log(response.data?.data);
         setTimeout(() => {
           navigate("/login");
+          setAuth(response.data?.data);
           setFormData({
             username: "",
             password: "",
@@ -257,7 +261,7 @@ export default function Register() {
           });
           setAvatar(null);
           setPreviewAvatar(null);
-        }, 3200);
+        }, 2000);
       } catch (error) {
         usernameRef.current.focus();
         const status = error.response?.data?.status;

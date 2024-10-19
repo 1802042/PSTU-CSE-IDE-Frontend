@@ -8,21 +8,24 @@ import Record from "./components/Records.jsx";
 import Login from "./components/login.jsx";
 import Pricing from "./components/Pricing.jsx";
 import Contact from "./components/Contact.jsx";
-// import Test from "./components/Test.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
+        {/* public routes  */}
         <Route index element={<Home />} />
-        <Route path="/editor" element={<Ide />} />
-        <Route path="/records" element={<Record />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        {/* <Route path="/testing" element={<Test />} /> */}
+        {/* protected routes  */}
+        <Route element={<RequireAuth />}>
+          <Route path="/editor" element={<Ide />} />
+          <Route path="/records" element={<Record />} />
+        </Route>
       </Route>
     </Routes>
   );

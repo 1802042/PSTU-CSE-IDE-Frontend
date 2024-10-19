@@ -7,50 +7,13 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Typography from "@mui/material/Typography";
-
-const languageTemplates = {
-  javascript: `// JavaScript Template
-console.log("Hello, World!");
-
-function add(a, b) {
-  return a + b;
-}
-
-console.log(add(5, 3));`,
-
-  python: `# Python Template
-print("Hello, World!")
-
-def add(a, b):
-    return a + b
-
-print(add(5, 3))`,
-
-  java: `// Java Template
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-        System.out.println(add(5, 3));
-    }
-
-    public static int add(int a, int b) {
-        return a + b;
-    }
-}`,
-
-  cpp: `// C++ Template
-#include <iostream>
-
-int add(int a, int b) {
-    return a + b;
-}
-
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    std::cout << add(5, 3) << std::endl;
-    return 0;
-}`,
-};
+import languageTemplates from "../constants.js";
+import monokai from "../themes/Monokai.json";
+import solarizedDark from "../themes/Solarized-dark.json";
+import solarizedLight from "../themes/Solarized-light.json";
+import dracula from "../themes/Dracula.json";
+import nord from "../themes/Nord.json";
+import tomorrowNightBlue from "../themes/Tomorrow-Night-Blue.json";
 
 const editorThemes = [
   "vs-dark",
@@ -65,6 +28,8 @@ const editorThemes = [
   "tomorrow-night-blue",
 ];
 
+const fontSizes = [8, 10, 12, 14, 15, 18, 20, 22];
+
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB
 
 const Header = ({
@@ -75,6 +40,8 @@ const Header = ({
   theme,
   handleLanguageChange,
   setTheme,
+  fontSize,
+  setFontSize,
 }) => (
   <div className="flex items-center justify-between p-4 bg-gray-800">
     <div className="flex items-center space-x-4 px-4">
@@ -136,7 +103,24 @@ const Header = ({
       >
         {editorThemes.map((t) => (
           <option key={t} value={t}>
-            {t}
+            {t === "tomorrow-night-blue"
+              ? "night-blue"
+              : t === "vs-dark"
+              ? "vscode-dark"
+              : t === "vs-light"
+              ? "vscode-light"
+              : t}
+          </option>
+        ))}
+      </select>
+      <select
+        value={fontSize}
+        onChange={(e) => setFontSize(parseInt(e.target.value))}
+        className="bg-gray-700 text-white border-gray-600 rounded p-2"
+      >
+        {fontSizes.map((size) => (
+          <option key={size} value={size}>
+            FontSize: {size}
           </option>
         ))}
       </select>
@@ -150,6 +134,7 @@ const CodeEditor = ({
   theme,
   handleEditorDidMount,
   setCode,
+  fontSize,
 }) => (
   <Editor
     height="100%"
@@ -159,6 +144,7 @@ const CodeEditor = ({
     onMount={handleEditorDidMount}
     onChange={(value) => setCode(value)}
     options={{
+      fontSize: fontSize,
       minimap: { enabled: true },
       scrollbar: {
         vertical: "visible",
@@ -196,6 +182,7 @@ const Ide = () => {
   const [theme, setTheme] = useState("vs-dark");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
+  const [fontSize, setFontSize] = useState(18); // Default font size
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -203,42 +190,16 @@ const Ide = () => {
     editorRef.current = editor;
 
     const themesToLoad = [
-      {
-        name: "monokai",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Monokai.json",
-      },
-      {
-        name: "solarized-dark",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Solarized-dark.json",
-      },
-      {
-        name: "solarized-light",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Solarized-light.json",
-      },
-      {
-        name: "dracula",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Dracula.json",
-      },
-      {
-        name: "nord",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Nord.json",
-      },
-      {
-        name: "tomorrow-night-blue",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Tomorrow-Night-Blue.json",
-      },
-      {
-        name: "kimbie-dark",
-        url: "https://cdn.jsdelivr.net/npm/monaco-themes@0.4.4/themes/Kimbie-Dark.json",
-      },
+      { name: "monokai", data: monokai },
+      { name: "solarized-dark", data: solarizedDark },
+      { name: "solarized-light", data: solarizedLight },
+      { name: "dracula", data: dracula },
+      { name: "nord", data: nord },
+      { name: "tomorrow-night-blue", data: tomorrowNightBlue },
     ];
 
-    themesToLoad.forEach(({ name, url }) => {
-      fetch(url)
-        .then((data) => data.json())
-        .then((data) => {
-          monaco.editor.defineTheme(name, data);
-        });
+    themesToLoad.forEach(({ name, data }) => {
+      monaco.editor.defineTheme(name, data);
     });
   };
 
@@ -292,19 +253,22 @@ const Ide = () => {
         theme={theme}
         handleLanguageChange={handleLanguageChange}
         setTheme={setTheme}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
       />
       <PanelGroup direction="horizontal" className="flex-grow">
-        <Panel defaultSize={75}>
+        <Panel defaultSize={70}>
           <CodeEditor
             language={language}
             code={code}
             theme={theme}
             handleEditorDidMount={handleEditorDidMount}
             setCode={setCode}
+            fontSize={fontSize} // Pass fontSize to CodeEditor
           />
         </Panel>
         <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
-        <Panel defaultSize={40}>
+        <Panel defaultSize={30}>
           <InputOutputPanel input={input} setInput={setInput} output={output} />
         </Panel>
       </PanelGroup>

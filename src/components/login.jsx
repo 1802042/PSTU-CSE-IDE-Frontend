@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cva } from "class-variance-authority";
 import { Label } from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import { UserIcon, MailIcon, LockIcon } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast, Bounce } from "react-toastify";
-import AuthContext from "../context/AuthProvider.context.jsx";
+import useAuth from "../hooks/useAuth.js";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "../api/axios.js";
 const LOGIN_URL = "/users/login";
@@ -86,10 +86,11 @@ const Login = () => {
     password: "",
   });
 
-  const { auth, setAuth } = useContext(AuthContext);
-
   const usernameRef = useRef();
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
 
   useEffect(() => {
     usernameRef.current.focus();
@@ -116,29 +117,17 @@ const Login = () => {
   };
 
   const fireToast = (message, success) => {
-    success
-      ? toast.success(message, {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        })
-      : toast.error(message, {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        });
+    toast.error(message, {
+      position: "top-center",
+      autoClose: 3500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -148,11 +137,9 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      fireToast("Login successful!", true);
-      setTimeout(() => {
-        navigate("/");
-        setAuth(response.data);
-      }, 3200);
+
+      setAuth(response.data);
+      navigate(from, { replace: true });
     } catch (error) {
       usernameRef.current.focus();
       const status = error.response?.data?.status;
@@ -177,7 +164,6 @@ const Login = () => {
 
   return (
     <div className="flex flex-col lg:flex-row">
-      <ToastContainer />
       <div className="lg:flex-1 bg-gray-900 text-white p-8 lg:p-16 flex items-center justify-center relative overflow-hidden">
         <div className="w-full max-w-md z-10">
           <h2 className="text-3xl font-bold text-white mb-8">
