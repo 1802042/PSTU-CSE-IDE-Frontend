@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Button from "@mui/material/Button";
 import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
 import { CheckCircle, XCircle } from "lucide-react";
+import axios, { isCanceled } from "../api/axios.js";
+import { mapLanguage } from "../constants.js";
+import { format } from "date-fns";
 
+const SUBMISSION_URL = "/submissions";
 const CustomButton = ({ onClick, disabled, children, isActive }) => (
   <button
     onClick={onClick}
@@ -75,7 +80,9 @@ const DataTable = ({ currentData, toggleShareStatus }) => (
     <table className="w-full border-collapse">
       <thead>
         <tr className="bg-gray-700">
-          <th className="border border-gray-600 p-2 text-center">Date</th>
+          <th className="border border-gray-600 p-2 text-center">
+            Creation Date
+          </th>
           <th className="border border-gray-600 p-2 text-center">Record</th>
           <th className="border border-gray-600 p-2 text-center">Language</th>
           <th className="border border-gray-600 p-2 text-center">Share Code</th>
@@ -127,25 +134,76 @@ const DataTable = ({ currentData, toggleShareStatus }) => (
 const Record = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [startPage, setStartPage] = useState(1);
-  const rowsPerPage = 12;
   const [data, setData] = useState([]);
+  const rowsPerPage = 12;
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const fireToast = (message) => {
+    toast.error(message, {
+      position: "top-center",
+      autoClose: 3500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+  };
 
   useEffect(() => {
-    const generateData = (page) =>
-      Array.from({ length: rowsPerPage }, (_, i) => ({
-        id: (page - 1) * rowsPerPage + i + 1,
-        date: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(
-          2,
-          "0"
-        )}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
-        record: `Record ${(page - 1) * rowsPerPage + i + 1}`,
-        language: ["English", "Spanish", "French", "German", "Chinese"][
-          Math.floor(Math.random() * 5)
-        ],
-        shared: Math.random() > 0.5,
-      }));
+    let isMounted = true;
+    const controller = new AbortController();
 
-    setData(generateData(currentPage));
+    const getSubmissions = async () => {
+      try {
+        const response = await axios.get(SUBMISSION_URL, {
+          withCredentials: true,
+          signal: controller.signal,
+          params: {
+            page: currentPage,
+            count: rowsPerPage,
+          },
+        });
+
+        if (isMounted) {
+          const transformedData = response.data?.data.map((item, i) => ({
+            id: (currentPage - 1) * rowsPerPage + i + 1,
+            date: format(new Date(item.createdAt), "PPpp"),
+            record: (currentPage - 1) * rowsPerPage + i + 1,
+            language: mapLanguage[item.languageId],
+            shared: Math.random() > 0.5,
+          }));
+
+          setData(transformedData);
+        }
+      } catch (err) {
+        if (isCanceled(err)) {
+        } else {
+          const status = err.response?.data?.status;
+          if (!status) {
+            fireToast("Something Went Wrong!");
+          } else if (status == "400") {
+            fireToast("Wrong Query Params Format!");
+          } else if (status == "500") {
+            fireToast("Something Went Wrong When Logging! Try Again!");
+          } else {
+            fireToast("Something Went Wrong!");
+          }
+          navigate("/login", { state: { from: location }, replace: true });
+        }
+      }
+    };
+
+    getSubmissions();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [currentPage]);
 
   const handleNextPage = () => {

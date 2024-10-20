@@ -7,7 +7,7 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Typography from "@mui/material/Typography";
-import languageTemplates from "../constants.js";
+import { languageTemplates } from "../constants.js";
 import monokai from "../themes/Monokai.json";
 import solarizedDark from "../themes/Solarized-dark.json";
 import solarizedLight from "../themes/Solarized-light.json";

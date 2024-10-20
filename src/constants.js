@@ -1,4 +1,4 @@
-const languageTemplates = {
+export const languageTemplates = {
   javascript: `// JavaScript Template
   console.log("Hello, World!");
   
@@ -42,4 +42,10 @@ const languageTemplates = {
   }`,
 };
 
-export default languageTemplates;
+export const mapLanguage = {
+  50: "C",
+  54: "C++",
+  62: "Java",
+  63: "JavaScript",
+  71: "Python",
+};

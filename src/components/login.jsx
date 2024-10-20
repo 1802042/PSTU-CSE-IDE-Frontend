@@ -116,7 +116,7 @@ const Login = () => {
     localStorage.clear();
   };
 
-  const fireToast = (message, success) => {
+  const fireToast = (message) => {
     toast.error(message, {
       position: "top-center",
       autoClose: 3500,
@@ -141,23 +141,20 @@ const Login = () => {
       setAuth(response.data);
       navigate(from, { replace: true });
     } catch (error) {
-      usernameRef.current.focus();
+      // usernameRef.current.focus();
       const status = error.response?.data?.status;
       if (!status) {
-        fireToast("Something Went Wrong!", false);
+        fireToast("Something Went Wrong!");
       } else if (status == "400") {
-        fireToast("Wrong Input Data Format!", false);
+        fireToast("Wrong Input Data Format!");
       } else if (status == "401") {
-        fireToast("Invalid Credentials!", false);
+        fireToast("Invalid Credentials!");
       } else if (status == "403") {
-        fireToast(
-          "Email Not Verified! Please Verify Email Before Loggin",
-          false
-        );
+        fireToast("Email Not Verified! Please Verify Email Before Loggin");
       } else if (status == "500") {
-        fireToast("Something Went Wrong When Logging! Try Again!", false);
+        fireToast("Something Went Wrong When Logging! Try Again!");
       } else {
-        fireToast("Something Went Wrong!", false);
+        fireToast("Something Went Wrong!");
       }
     }
   };
