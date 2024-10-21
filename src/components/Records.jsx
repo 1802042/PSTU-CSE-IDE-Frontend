@@ -3,9 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Button from "@mui/material/Button";
 import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
 import { CheckCircle, XCircle } from "lucide-react";
-import axios, { isCanceled } from "../api/axios.js";
+import { isCanceled } from "../api/axios.js";
 import { mapLanguage } from "../constants.js";
 import { format } from "date-fns";
+import { toast, Bounce } from "react-toastify";
+import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 
 const SUBMISSION_URL = "/submissions";
 const CustomButton = ({ onClick, disabled, children, isActive }) => (
@@ -140,6 +142,8 @@ const Record = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const axiosPrivate = useAxiosPrivate();
+
   const fireToast = (message) => {
     toast.error(message, {
       position: "top-center",
@@ -160,7 +164,7 @@ const Record = () => {
 
     const getSubmissions = async () => {
       try {
-        const response = await axios.get(SUBMISSION_URL, {
+        const response = await axiosPrivate.get(SUBMISSION_URL, {
           withCredentials: true,
           signal: controller.signal,
           params: {
@@ -187,7 +191,10 @@ const Record = () => {
           if (!status) {
             fireToast("Something Went Wrong!");
           } else if (status == "400") {
-            fireToast("Wrong Query Params Format!");
+            fireToast("Wrong Query Params!");
+          } else if (status == "500") {
+          } else if (status == "401") {
+            fireToast("Unauthorized access! Please Login!");
           } else if (status == "500") {
             fireToast("Something Went Wrong When Logging! Try Again!");
           } else {

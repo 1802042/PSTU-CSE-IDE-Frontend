@@ -4,7 +4,7 @@ import { Label } from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import { UserIcon, MailIcon, LockIcon } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { ToastContainer, toast, Bounce } from "react-toastify";
+import { toast, Bounce } from "react-toastify";
 import useAuth from "../hooks/useAuth.js";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "../api/axios.js";
@@ -138,7 +138,7 @@ const Login = () => {
         withCredentials: true,
       });
 
-      setAuth(response.data);
+      setAuth(response.data.data);
       navigate(from, { replace: true });
     } catch (error) {
       // usernameRef.current.focus();

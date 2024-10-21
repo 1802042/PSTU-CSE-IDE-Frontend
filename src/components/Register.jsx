@@ -249,10 +249,8 @@ export default function Register() {
         });
 
         fireToast("You have registered successfully!", true);
-        console.log(response.data?.data);
         setTimeout(() => {
           navigate("/login");
-          setAuth(response.data?.data);
           setFormData({
             username: "",
             password: "",

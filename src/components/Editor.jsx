@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Download, Upload } from "lucide-react";
@@ -14,8 +14,9 @@ import solarizedLight from "../themes/Solarized-light.json";
 import dracula from "../themes/Dracula.json";
 import nord from "../themes/Nord.json";
 import tomorrowNightBlue from "../themes/Tomorrow-Night-Blue.json";
-import axios from "../api/axios.js";
+import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 import { toast, Bounce } from "react-toastify";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const SUBMIT_URL = "/submissions/submit";
 const RESULT_URL = "/submissions/result";
@@ -188,9 +189,15 @@ const Ide = () => {
   const [theme, setTheme] = useState("dracula");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [fontSize, setFontSize] = useState(18); // Default font size
+  const [fontSize, setFontSize] = useState(18);
+  const [resultId, setResultId] = useState(null);
+
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const axiosPrivate = useAxiosPrivate();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -242,12 +249,15 @@ const Ide = () => {
       let intervalId;
       try {
         intervalId = setInterval(async () => {
-          const response = await axios.get(`${RESULT_URL}/${submissionId}`, {
-            withCredentials: true,
-            params: {
-              submissionId,
-            },
-          });
+          const response = await axiosPrivate.get(
+            `${RESULT_URL}/${submissionId}`,
+            {
+              withCredentials: true,
+              params: {
+                submissionId,
+              },
+            }
+          );
 
           const result = response.data?.data;
           if (result?.status && result?.status !== "Processing") {
@@ -275,10 +285,8 @@ const Ide = () => {
       languageId: mapLanguageId[language],
     };
 
-    console.log(`stdin :------------ ${requestData.stdin}`);
-
     try {
-      const response = await axios(SUBMIT_URL, {
+      const response = await axiosPrivate(SUBMIT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -288,18 +296,40 @@ const Ide = () => {
       });
 
       const result = response.data?.data;
+      setResultId(result?._id || resultId);
       setOutput(`[${result?.status}...]`);
-      const submissionResult = await fetchResult(result?._id);
-
-      if (!submissionResult) {
-        fireToast("Something went Wrong!", false);
-      }
-      fireToast(submissionResult.status, submissionResult.status == "Accepted");
-      setOutput(submissionResult.stdout);
     } catch (error) {
       setOutput("Error executing code.");
+      navigate("/login", {
+        state: { from: location },
+        replace: true,
+      });
     }
   };
+
+  useEffect(() => {
+    const getResult = async () => {
+      try {
+        const submissionResult = await fetchResult(resultId);
+
+        fireToast(
+          submissionResult.status,
+          submissionResult.status == "Accepted"
+        );
+        setOutput(submissionResult.stdout);
+      } catch (error) {
+        navigate("/login", {
+          state: { from: location },
+          replace: true,
+        });
+        setOutput("Error executing code.");
+      }
+    };
+
+    if (resultId) {
+      getResult();
+    }
+  }, [resultId]);
 
   const handleLanguageChange = (event) => {
     const newLanguage = event.target.value;
