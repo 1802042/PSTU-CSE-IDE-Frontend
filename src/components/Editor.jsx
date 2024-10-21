@@ -7,15 +7,22 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Typography from "@mui/material/Typography";
-import { languageTemplates } from "../constants.js";
+import { languageTemplates, mapLanguageId } from "../constants.js";
 import monokai from "../themes/Monokai.json";
 import solarizedDark from "../themes/Solarized-dark.json";
 import solarizedLight from "../themes/Solarized-light.json";
 import dracula from "../themes/Dracula.json";
 import nord from "../themes/Nord.json";
 import tomorrowNightBlue from "../themes/Tomorrow-Night-Blue.json";
+import axios from "../api/axios.js";
+import { toast, Bounce } from "react-toastify";
+
+const SUBMIT_URL = "/submissions/submit";
+const RESULT_URL = "/submissions/result";
 
 const editorThemes = [
+  "dracula",
+  "nord",
   "vs-dark",
   "vs-light",
   "hc-black",
@@ -23,8 +30,6 @@ const editorThemes = [
   "monokai",
   "solarized-dark",
   "solarized-light",
-  "dracula",
-  "nord",
   "tomorrow-night-blue",
 ];
 
@@ -95,6 +100,7 @@ const Header = ({
         <option value="python">Python</option>
         <option value="java">Java</option>
         <option value="cpp">C++</option>
+        <option value="c">C</option>
       </select>
       <select
         value={theme}
@@ -177,9 +183,9 @@ const InputOutputPanel = ({ input, setInput, output }) => (
 );
 
 const Ide = () => {
-  const [code, setCode] = useState(languageTemplates.javascript);
-  const [language, setLanguage] = useState("javascript");
-  const [theme, setTheme] = useState("vs-dark");
+  const [code, setCode] = useState(languageTemplates.cpp);
+  const [language, setLanguage] = useState("cpp");
+  const [theme, setTheme] = useState("dracula");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [fontSize, setFontSize] = useState(18); // Default font size
@@ -201,11 +207,98 @@ const Ide = () => {
     themesToLoad.forEach(({ name, data }) => {
       monaco.editor.defineTheme(name, data);
     });
+
+    monaco.editor.setTheme("dracula");
   };
 
-  const handleRunCode = () => {
-    // In a real implementation, this would send the code to a backend for execution
-    setOutput("Code execution result would appear here.");
+  const fireToast = (message, success) => {
+    success
+      ? toast.success(message, {
+          position: "top-center",
+          autoClose: 3500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        })
+      : toast.error(message, {
+          position: "top-center",
+          autoClose: 3500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+  };
+
+  const fetchResult = (submissionId) => {
+    return new Promise((resolve, reject) => {
+      let intervalId;
+      try {
+        intervalId = setInterval(async () => {
+          const response = await axios.get(`${RESULT_URL}/${submissionId}`, {
+            withCredentials: true,
+            params: {
+              submissionId,
+            },
+          });
+
+          const result = response.data?.data;
+          if (result?.status && result?.status !== "Processing") {
+            clearInterval(intervalId);
+            resolve(result);
+          }
+        }, 1500);
+
+        setTimeout(() => {
+          clearInterval(intervalId);
+          reject(new Error("Timeout: Result not obtained within 10 seconds"));
+        }, 10000);
+      } catch (err) {
+        clearInterval(intervalId);
+        reject(err);
+      }
+    });
+  };
+
+  const handleRunCode = async () => {
+    const editorValue = editorRef.current.getValue();
+    const requestData = {
+      sourceCode: editorValue,
+      stdin: input,
+      languageId: mapLanguageId[language],
+    };
+
+    console.log(`stdin :------------ ${requestData.stdin}`);
+
+    try {
+      const response = await axios(SUBMIT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: JSON.stringify(requestData),
+        withCredentials: true,
+      });
+
+      const result = response.data?.data;
+      setOutput(`[${result?.status}...]`);
+      const submissionResult = await fetchResult(result?._id);
+
+      if (!submissionResult) {
+        fireToast("Something went Wrong!", false);
+      }
+      fireToast(submissionResult.status, submissionResult.status == "Accepted");
+      setOutput(submissionResult.stdout);
+    } catch (error) {
+      setOutput("Error executing code.");
+    }
   };
 
   const handleLanguageChange = (event) => {
@@ -219,7 +312,19 @@ const Ide = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `code.${language}`;
+    a.download = `code.${
+      language === "c"
+        ? "c"
+        : language === "cpp"
+        ? "cpp"
+        : language === "javascript"
+        ? "js"
+        : language === "python"
+        ? "py"
+        : language === "java"
+        ? "java"
+        : "txt"
+    }`;
     a.click();
     URL.revokeObjectURL(url);
   }, [code, language]);
@@ -238,6 +343,18 @@ const Ide = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setCode(e.target.result);
+        const extension = file.name.split(".").pop();
+        const newLanguage =
+          extension === "c"
+            ? "c"
+            : extension === "cpp"
+            ? "cpp"
+            : extension === "js"
+            ? "javascript"
+            : extension === "py"
+            ? "python"
+            : "java";
+        setLanguage(newLanguage);
       };
       reader.readAsText(file);
     }
@@ -277,7 +394,7 @@ const Ide = () => {
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
-        accept=".js,.py,.java,.cpp"
+        accept=".js,.py,.java,.cpp, .c"
       />
     </div>
   );
