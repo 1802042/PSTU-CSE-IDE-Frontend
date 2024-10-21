@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { Panel } from "react-resizable-panels";
 import { Download, Upload } from "lucide-react";
 import Button from "@mui/material/Button";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
@@ -17,6 +17,9 @@ import tomorrowNightBlue from "../themes/Tomorrow-Night-Blue.json";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 import { toast, Bounce } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import { PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 const SUBMIT_URL = "/submissions/submit";
 const RESULT_URL = "/submissions/result";
@@ -161,27 +164,78 @@ const CodeEditor = ({
   />
 );
 
-const InputOutputPanel = ({ input, setInput, output }) => (
-  <PanelGroup direction="vertical">
-    <Panel defaultSize={50}>
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter input here..."
-        className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
-      />
-    </Panel>
-    <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
-    <Panel defaultSize={50}>
-      <textarea
-        value={output}
-        readOnly
-        placeholder="Output will appear here..."
-        className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
-      />
-    </Panel>
-  </PanelGroup>
-);
+const InputOutputPanel = ({
+  input,
+  setInput,
+  output,
+  expectedOutput,
+  setExpectedOutput,
+}) => {
+  const [activeTab, setActiveTab] = useState("input");
+
+  return (
+    <PanelGroup direction="vertical">
+      <Panel defaultSize={50}>
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full h-full"
+        >
+          <TabsList className="flex mb-2">
+            <TabsTrigger
+              value="input"
+              className={`flex-1 py-2 px-4 text-center font-semibold cursor-pointer ${
+                activeTab === "input"
+                  ? "bg-blue-800 text-white"
+                  : "bg-gray-700 text-white hover:bg-gray-600"
+              }`}
+            >
+              Input
+            </TabsTrigger>
+            <TabsTrigger
+              value="expected"
+              className={`flex-1 py-2 px-4 text-center font-semibold cursor-pointer ${
+                activeTab === "expected"
+                  ? "bg-blue-800 text-white"
+                  : "bg-gray-700 text-white hover:bg-gray-600"
+              }`}
+            >
+              Expected Output
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="input" className="h-[calc(100%-40px)]">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Enter input here..."
+              className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
+            />
+          </TabsContent>
+          <TabsContent value="expected" className="h-[calc(100%-40px)]">
+            <textarea
+              value={expectedOutput}
+              onChange={(e) => setExpectedOutput(e.target.value)}
+              placeholder="Enter expected output here..."
+              className="w-full h-full bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
+            />
+          </TabsContent>
+        </Tabs>
+      </Panel>
+      <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
+      <Panel defaultSize={50}>
+        <div className="h-full">
+          <h3 className="text-center text-m font-semibold mb-2">Output</h3>
+          <textarea
+            value={output}
+            readOnly
+            placeholder="Output will appear here..."
+            className="w-full h-[calc(100%-28px)] bg-gray-800 text-white font-mono p-2 resize-none border-gray-700"
+          />
+        </div>
+      </Panel>
+    </PanelGroup>
+  );
+};
 
 const Ide = () => {
   const [code, setCode] = useState(languageTemplates.cpp);
@@ -189,6 +243,7 @@ const Ide = () => {
   const [theme, setTheme] = useState("dracula");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
+  const [expectedOutput, setExpectedOutput] = useState("");
   const [fontSize, setFontSize] = useState(18);
   const [resultId, setResultId] = useState(null);
 
@@ -281,7 +336,8 @@ const Ide = () => {
     const editorValue = editorRef.current.getValue();
     const requestData = {
       sourceCode: editorValue,
-      stdin: input,
+      stdin: input.trim(),
+      expected: expectedOutput.trim(),
       languageId: mapLanguageId[language],
     };
 
@@ -300,10 +356,19 @@ const Ide = () => {
       setOutput(`[${result?.status}...]`);
     } catch (error) {
       setOutput("Error executing code.");
-      navigate("/login", {
-        state: { from: location },
-        replace: true,
-      });
+      const status = error?.status;
+      if (!status) {
+        fireToast("Something went wrong! Try again!", false);
+      } else if (status == 400) {
+        fireToast("Source code is empty!", false);
+      } else if (status == 401 || status == 403) {
+        navigate("/login", {
+          state: { from: location },
+          replace: true,
+        });
+      } else {
+        fireToast("Something went wrong! Try again!", false);
+      }
     }
   };
 
@@ -311,18 +376,25 @@ const Ide = () => {
     const getResult = async () => {
       try {
         const submissionResult = await fetchResult(resultId);
-
-        fireToast(
-          submissionResult.status,
-          submissionResult.status == "Accepted"
-        );
+        if (submissionResult.status == "Accepted") {
+          fireToast(submissionResult.status, true);
+        }
         setOutput(submissionResult.stdout);
       } catch (error) {
-        navigate("/login", {
-          state: { from: location },
-          replace: true,
-        });
         setOutput("Error executing code.");
+        const status = error?.status;
+        if (!status) {
+          fireToast("Something went wrong! Try again!", false);
+        } else if (status == 401 || status == 403) {
+          navigate("/login", {
+            state: { from: location },
+            replace: true,
+          });
+        } else if (status == 404) {
+          fireToast("Invalid submission id!", false);
+        } else {
+          fireToast("Something went wrong! Try again!", false);
+        }
       }
     };
 
@@ -411,12 +483,18 @@ const Ide = () => {
             theme={theme}
             handleEditorDidMount={handleEditorDidMount}
             setCode={setCode}
-            fontSize={fontSize} // Pass fontSize to CodeEditor
+            fontSize={fontSize}
           />
         </Panel>
         <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-gray-600 transition-colors" />
         <Panel defaultSize={30}>
-          <InputOutputPanel input={input} setInput={setInput} output={output} />
+          <InputOutputPanel
+            input={input}
+            setInput={setInput}
+            output={output}
+            expectedOutput={expectedOutput}
+            setExpectedOutput={setExpectedOutput}
+          />
         </Panel>
       </PanelGroup>
       <input

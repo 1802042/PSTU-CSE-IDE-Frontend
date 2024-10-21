@@ -193,14 +193,16 @@ const Record = () => {
           } else if (status == "400") {
             fireToast("Wrong Query Params!");
           } else if (status == "500") {
-          } else if (status == "401") {
-            fireToast("Unauthorized access! Please Login!");
+          } else if (status == 401 || status == 403) {
+            navigate("/login", {
+              state: { from: location },
+              replace: true,
+            });
           } else if (status == "500") {
             fireToast("Something Went Wrong When Logging! Try Again!");
           } else {
             fireToast("Something Went Wrong!");
           }
-          navigate("/login", { state: { from: location }, replace: true });
         }
       }
     };
