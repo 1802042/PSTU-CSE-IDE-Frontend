@@ -154,7 +154,7 @@ const Header = () => {
               </svg>
               <span className="text-2xl font-bold">PSTU LAB IDE</span>
             </Link>
-            <nav className="hidden md:block">
+            <nav className="md:block">
               <ul className="flex space-x-6">
                 {["Home", "IDE", "Records", "Pricing", "Contact"].map(
                   (item) => (
@@ -201,7 +201,6 @@ const Header = () => {
             )}
           </div>
         </div>
-        <MobileMenu isMenuOpen={isMenuOpen} toggleMenu={toggleMenu} />
       </div>
     </header>
   );
