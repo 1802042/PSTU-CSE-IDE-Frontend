@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import axios from "../api/axios.js";
 import useAuth from "./useAuth.js";
 
@@ -10,13 +11,7 @@ const useRefreshToken = () => {
       withCredentials: true,
     });
 
-    setAuth((prev) => {
-      const newState = {
-        ...prev,
-        accessToken: response.data?.data?.accessToken,
-      };
-      return newState;
-    });
+    setAuth(response.data?.data);
     return response.data?.data?.accessToken;
   };
   return refreshAccessToken;

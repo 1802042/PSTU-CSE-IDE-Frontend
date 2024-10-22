@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
 import Button from "@mui/material/Button";
+import useLogout from "../hooks/useLogout.js";
 
 const UserMenu = ({ isMenuOpen, toggleMenu, handleLogout }) => (
   <div className="relative">
@@ -118,6 +119,7 @@ const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const logout = useLogout();
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -125,6 +127,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
+    logout();
     setIsLoggedIn(false);
     setIsMenuOpen(false);
     navigate("/login");

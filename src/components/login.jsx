@@ -87,7 +87,7 @@ const Login = () => {
   });
 
   const usernameRef = useRef();
-  const { setAuth } = useAuth();
+  const { persist, setPersist, setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
@@ -138,7 +138,7 @@ const Login = () => {
         withCredentials: true,
       });
 
-      setAuth(response.data.data);
+      setAuth(response.data?.data);
       navigate(from, { replace: true });
     } catch (error) {
       // usernameRef.current.focus();
@@ -158,6 +158,14 @@ const Login = () => {
       }
     }
   };
+
+  const togglePersist = () => {
+    setPersist((prev) => !prev);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("persist", persist);
+  }, [persist]);
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -200,6 +208,15 @@ const Login = () => {
               placeholder="Your Password"
               required
             />
+            <div className="persistCheck">
+              <input
+                type="checkbox"
+                id="persist"
+                onChange={togglePersist}
+                checked={persist}
+              />
+              <label htmlFor="persist">Trust This Device</label>
+            </div>
             <Button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"

@@ -9,6 +9,7 @@ import Login from "./components/login.jsx";
 import Pricing from "./components/Pricing.jsx";
 import Contact from "./components/Contact.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
+import PersistLogin from "./components/PersistLogin.jsx";
 
 export default function App() {
   return (
@@ -22,9 +23,11 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
 
         {/* protected routes  */}
-        <Route element={<RequireAuth />}>
-          <Route path="/editor" element={<Ide />} />
-          <Route path="/records" element={<Record />} />
+        <Route element={<PersistLogin />}>
+          <Route element={<RequireAuth />}>
+            <Route path="/editor" element={<Ide />} />
+            <Route path="/records" element={<Record />} />
+          </Route>
         </Route>
       </Route>
     </Routes>
