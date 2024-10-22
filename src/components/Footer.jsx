@@ -14,18 +14,18 @@ const Footer = () => {
           </Link>
         </li>
         <li className="mb-2">
-          <Link to="/about" className="text-gray-400 hover:text-white">
-            About
+          <Link to="/editor" className="text-gray-400 hover:text-white">
+            IDE
           </Link>
         </li>
         <li className="mb-2">
-          <Link to="/services" className="text-gray-400 hover:text-white">
-            Services
+          <Link to="/records" className="text-gray-400 hover:text-white">
+            Records
           </Link>
         </li>
         <li className="mb-2">
-          <Link to="/contact" className="text-gray-400 hover:text-white">
-            Contact
+          <Link to="/pricing" className="text-gray-400 hover:text-white">
+            Pricing
           </Link>
         </li>
       </ul>
@@ -37,44 +37,34 @@ const Footer = () => {
       <h3 className="text-xl font-semibold mb-4">Follow Us</h3>
       <ul>
         <li className="mb-2">
-          <a
-            href="https://facebook.com"
+          <Link
+            to="https://github.com/1802042"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white"
           >
-            Facebook
-          </a>
+            GitHub
+          </Link>
         </li>
         <li className="mb-2">
-          <a
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white"
-          >
-            Twitter
-          </a>
-        </li>
-        <li className="mb-2">
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white"
-          >
-            Instagram
-          </a>
-        </li>
-        <li className="mb-2">
-          <a
-            href="https://linkedin.com"
+          <Link
+            to="https://linkedin.com/in/rm1802042"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white"
           >
             LinkedIn
-          </a>
+          </Link>
+        </li>
+        <li className="mb-2">
+          <Link
+            to="https://www.facebook.com/knightshade.1802042/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-white"
+          >
+            Facebook
+          </Link>
         </li>
       </ul>
     </div>
@@ -83,9 +73,12 @@ const Footer = () => {
   const ContactUs = () => (
     <div>
       <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
-      <p className="text-gray-400">123 Main Street, Anytown, USA</p>
-      <p className="text-gray-400">Email: info@mywebsite.com</p>
-      <p className="text-gray-400">Phone: (123) 456-7890</p>
+      <p className="text-gray-400">
+        Patuakhali Science and Technology University
+      </p>
+      <p className="text-gray-400">Dumki, Patuakhali - 8602</p>
+      <p className="text-gray-400">Email: rony16@cse.pstu.ac.bd</p>
+      <p className="text-gray-400">Phone: (+880) 1742-059121</p>
     </div>
   );
 
@@ -104,10 +97,10 @@ const Footer = () => {
             clipRule="evenodd"
           />
         </svg>
-        MyWebsite
+        PSTU LAB IDE
       </h2>
       <p className="text-gray-400">
-        &copy; {currentYear} MyWebsite. All rights reserved.
+        &copy; {currentYear} PSTU LAB IDE. All rights reserved.
       </p>
     </div>
   );

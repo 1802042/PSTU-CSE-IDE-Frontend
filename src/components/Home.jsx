@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Confetti from "react-confetti";
+import Button from "@mui/material/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -9,25 +11,8 @@ import {
   Book,
   Zap,
 } from "lucide-react";
-import Highlight from "react-highlight";
-import "highlight.js/styles/atom-one-dark.css";
-import { codeExamples } from "../constants.js";
-
-const PreviewIde = ({ code, language }) => (
-  <div className="bg-gray-900 rounded-lg overflow-hidden">
-    <div className="flex items-center justify-between p-4 bg-gray-800">
-      <div className="flex space-x-2">
-        <div className="w-3 h-3 rounded-full bg-red-500"></div>
-        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-      </div>
-      <span className="text-gray-400 text-sm">{language}</span>
-    </div>
-    <div className="p-4 overflow-x-auto scrollbar-hide">
-      <Highlight className={language}>{code}</Highlight>
-    </div>
-  </div>
-);
+import { codeExamples, languageTemplates } from "../constants.js";
+import PreviewIde from "./PreviewIde.jsx";
 
 const FeatureCard = ({ icon: Icon, title, description }) => (
   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -46,6 +31,8 @@ const Home = () => {
     height: 0,
   });
 
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("java");
 
   useEffect(() => {
@@ -62,8 +49,16 @@ const Home = () => {
   }, []);
 
   const handleGetStarted = () => {
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 5000);
+    navigate("/editor", {
+      state: { from: location },
+      replace: true,
+    });
+  };
+  const handleGetContact = () => {
+    navigate("/pricing", {
+      state: { from: location },
+      replace: true,
+    });
   };
 
   useEffect(() => {
@@ -89,7 +84,7 @@ const Home = () => {
         />
       )}
 
-      <main className="max-w-7xl mx-auto px-4 py-10">
+      <main className="max-w-7xl mx-auto px-4 py-20">
         <motion.section
           className="mb-10 text-center"
           initial={{ opacity: 0 }}
@@ -97,7 +92,7 @@ const Home = () => {
           transition={{ duration: 1 }}
         >
           <motion.h2
-            className="text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
+            className="text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -105,7 +100,7 @@ const Home = () => {
             PSTU CSE OFFLINE LAB IDE
           </motion.h2>
           <motion.p
-            className="text-xl text-blue-200 mb-10 max-w-3xl mx-auto"
+            className="text-2xl text-blue-200 mb-10 max-w-3xl mx-auto"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -115,126 +110,75 @@ const Home = () => {
             Focus on writing code while we handle the rest
             <ArrowRight className="inline ml-4" />
           </motion.p>
+
+          <div className="grid md:grid-cols-6 gap-2">
+            <div></div>
+            <div></div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="contained"
+                onClick={handleGetStarted}
+                // endIcon={<LoginIcon />}
+                className="px-7 py-3 border-2 bg-orange-500 hover:bg-orange-500 rounded-lg font-semibold transition-all duration-200"
+                color="warning"
+              >
+                Get Started
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="contained"
+                onClick={handleGetContact}
+                className="px-7 py-3 border-2 hover:bg-red-700 hover:text-white rounded-lg font-semibold transition-all duration-200 "
+                color="error"
+              >
+                Pick a Plan
+              </Button>
+            </motion.div>
+          </div>
+
           {/* <motion.div
-            className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
+            className="flex flex-col sm:flex-row justify-center gap-5"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <button
+            <Button
+              variant="contained"
               onClick={handleGetStarted}
-              className="px-7 py-3 border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-gray-900 rounded-lg font-semibold transition-all duration-200"
+              // endIcon={<LoginIcon />}
+              className="px-7 py-3 border-2 bg-orange-500 hover:bg-orange-500 rounded-lg font-semibold transition-all duration-200"
+              color="warning"
             >
               Get Started
-            </button>
-            <button className="px-7 py-3 border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-gray-900 rounded-lg font-semibold transition-all duration-200">
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleGetStarted}
+              className="px-7 py-3 border-2 hover:bg-red-700 hover:text-white rounded-lg font-semibold transition-all duration-200 "
+              color="error"
+            >
               Live Demo
-            </button>
-          </motion.div> */}
-        </motion.section>
-        <motion.section>
-          <section id="languages" className="mb-16">
-            <div className="bg-gray-800 rounded-lg overflow-hidden">
-              <div className="flex border-b border-gray-700">
-                {Object.keys(codeExamples).map((lang) => (
-                  <button
-                    key={lang}
-                    className={`px-4 py-2 focus:outline-none ${
-                      activeTab === lang
-                        ? "bg-gray-700 text-blue-400"
-                        : "text-gray-400 hover:bg-gray-700 hover:text-gray-200"
-                    }`}
-                    onClick={() => setActiveTab(lang)}
-                  >
-                    {lang.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <PreviewIde
-                    code={codeExamples[activeTab]}
-                    language={activeTab}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </section>
+            </Button>
+          </motion.div>*/}
         </motion.section>
 
-        {/* <motion.section
-          className="mb-20"
+        <motion.section
+          className="mb-20 justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-5">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <PreviewIde
-                language="cpp"
-                code={`// Language: C++
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
-using namespace std;
-
-int main() {
-    vector<int> numbers = {5, 2, 8, 1, 9};
-    
-    cout << "Original vector: ";
-    for (int num : numbers) {
-        cout << num << " ";
-    }
-    cout << endl;
-
-    // Sort the vector
-    sort(numbers.begin(), numbers.end());
-
-    cout << "Sorted vector: ";
-    for (int num : numbers) {
-        cout << num << " ";
-    }
-    cout << endl;
-
-    return 0;
-}`}
-              />
+              <PreviewIde language="java" code={languageTemplates["java"]} />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <PreviewIde
-                language="java"
-                code={`// Language: Java
-import java.util.ArrayList;
-import java.util.Collections;
-
-public class Main {
-    public static void main(String[] args) {
-        ArrayList<Integer> numbers = new ArrayList<>();
-        numbers.add(5);
-        numbers.add(2);
-        numbers.add(8);
-        numbers.add(1);
-        numbers.add(9);
-
-        System.out.println("Original list: " + numbers);
-
-        // Sort the list
-        Collections.sort(numbers);
-
-        System.out.println("Sorted list: " + numbers);
-    }
-}`}
-              />
+              <PreviewIde language="C/C++" code={languageTemplates["c"]} />
             </motion.div>
           </div>
-        </motion.section> */}
+        </motion.section>
         <motion.section
           className="mb-10"
           initial={{ opacity: 0, y: 20 }}
@@ -316,6 +260,41 @@ public class Main {
               description="Access tutorials and documentation right within the IDE for seamless learning."
             />
           </div>
+        </motion.section>
+        <motion.section>
+          <section id="languages" className="mb-16">
+            <div className="bg-gray-800 rounded-lg overflow-hidden">
+              <div className="flex border-b border-gray-700">
+                {Object.keys(codeExamples).map((lang) => (
+                  <button
+                    key={lang}
+                    className={`px-4 py-2 focus:outline-none ${
+                      activeTab === lang
+                        ? "bg-gray-700 text-blue-400"
+                        : "text-gray-400 hover:bg-gray-700 hover:text-gray-200"
+                    }`}
+                    onClick={() => setActiveTab(lang)}
+                  >
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <PreviewIde
+                    code={codeExamples[activeTab]}
+                    language={activeTab}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </section>
         </motion.section>
 
         <motion.section

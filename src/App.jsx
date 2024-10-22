@@ -10,6 +10,7 @@ import Pricing from "./components/Pricing.jsx";
 import Contact from "./components/Contact.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import PersistLogin from "./components/PersistLogin.jsx";
+import AdminDashboard from "./components/AdminDashboard.jsx";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route path="/editor" element={<Ide />} />
             <Route path="/records" element={<Record />} />
+            <Route path="/dashboard" element={<AdminDashboard />} />
           </Route>
         </Route>
       </Route>

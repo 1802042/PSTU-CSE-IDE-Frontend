@@ -10,6 +10,23 @@ import { toast, Bounce } from "react-toastify";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 
 const SUBMISSION_URL = "/submissions";
+const VERDICT_COLORS = {
+  "In Queue": "#e5e7eb", // light gray
+  Processing: "#3b82f6", // blue
+  Accepted: "#4ade80", // green
+  "Wrong Answer": "#ef4444", // red
+  "Time Limit Exceeded": "#f97316", // orange
+  "Compilation Error": "#a855f7", // purple
+  "Runtime Error (SIGSEGV)": "#f43f5e", // rose
+  "Runtime Error (SIGXFSZ)": "#f43f5e", // rose
+  "Runtime Error (SIGFPE)": "#f43f5e", // rose
+  "Runtime Error (SIGABRT)": "#f43f5e", // rose
+  "Runtime Error (NZEC)": "#f43f5e", // rose
+  "Runtime Error (Other)": "#f43f5e", // rose
+  "Internal Error": "#facc15", // yellow
+  "Exec Format Error": "#f87171", // light red
+};
+
 const CustomButton = ({ onClick, disabled, children, isActive }) => (
   <button
     onClick={onClick}
@@ -108,7 +125,9 @@ const DataTable = ({ currentData, toggleShareStatus }) => (
               {row.language}
             </td>
             <td className="border border-gray-600 p-2 text-center">
-              {row.status}
+              <span style={{ color: VERDICT_COLORS[row.status] || "white" }}>
+                {row.status}
+              </span>
             </td>
             <td className="border border-gray-600 p-2 text-center">
               <div className="flex justify-center items-center space-x-2">
