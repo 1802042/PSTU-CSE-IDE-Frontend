@@ -17,6 +17,7 @@ import tomorrowNightBlue from "../themes/Tomorrow-Night-Blue.json";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 import { toast, Bounce } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
+import Confetti from "react-confetti";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -324,7 +325,7 @@ const Ide = () => {
         setTimeout(() => {
           clearInterval(intervalId);
           reject(new Error("Timeout: Result not obtained within 10 seconds"));
-        }, 10000);
+        }, 20000);
       } catch (err) {
         clearInterval(intervalId);
         reject(err);
@@ -357,6 +358,7 @@ const Ide = () => {
     } catch (error) {
       setOutput("Error executing code.");
       const status = error?.status;
+      console.log(error);
       if (!status) {
         fireToast("Something went wrong! Try again!", false);
       } else if (status == 400) {
@@ -372,16 +374,37 @@ const Ide = () => {
     }
   };
 
+  const [showConfetti, setShowConfetti] = useState(false);
   useEffect(() => {
     const getResult = async () => {
       try {
         const submissionResult = await fetchResult(resultId);
         if (submissionResult.status == "Accepted") {
           fireToast(submissionResult.status, true);
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 5000);
         }
-        setOutput(submissionResult.stdout);
+        const okFormat =
+          submissionResult.stdout +
+          "\n" +
+          `[${submissionResult.status}]` +
+          "\n" +
+          "Time: " +
+          submissionResult.cpu +
+          "s Memory: " +
+          submissionResult.memory +
+          "kb";
+        const errorFormat =
+          submissionResult.status +
+          "\n" +
+          submissionResult.compile +
+          "\n" +
+          submissionResult.stdout;
+        setOutput(
+          parseInt(submissionResult.statusId, 10) >= 6 ? errorFormat : okFormat
+        );
       } catch (error) {
-        setOutput("Error executing code.");
+        setOutput("Error executing code.>");
         const status = error?.status;
         if (!status) {
           fireToast("Something went wrong! Try again!", false);
@@ -464,6 +487,14 @@ const Ide = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white px-5 py-2">
+      {showConfetti && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={200}
+        />
+      )}
       <Header
         handleExportCode={handleExportCode}
         handleImportCode={handleImportCode}

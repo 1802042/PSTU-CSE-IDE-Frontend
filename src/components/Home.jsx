@@ -46,9 +46,7 @@ const Home = () => {
           className="w-full h-full"
           viewBox="0 0 100 100"
           preserveAspectRatio="xMidYMid slice"
-        >
-          {/* ... (SVG code remains the same) ... */}
-        </svg>
+        ></svg>
       </div>
 
       <AnimatePresence>

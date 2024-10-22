@@ -87,6 +87,7 @@ const DataTable = ({ currentData, toggleShareStatus }) => (
           </th>
           <th className="border border-gray-600 p-2 text-center">Record</th>
           <th className="border border-gray-600 p-2 text-center">Language</th>
+          <th className="border border-gray-600 p-2 text-center">Status</th>
           <th className="border border-gray-600 p-2 text-center">Share Code</th>
           <th className="border border-gray-600 p-2 text-center">Action</th>
         </tr>
@@ -105,6 +106,9 @@ const DataTable = ({ currentData, toggleShareStatus }) => (
             </td>
             <td className="border border-gray-600 p-2 text-center">
               {row.language}
+            </td>
+            <td className="border border-gray-600 p-2 text-center">
+              {row.status}
             </td>
             <td className="border border-gray-600 p-2 text-center">
               <div className="flex justify-center items-center space-x-2">
@@ -179,6 +183,7 @@ const Record = () => {
             date: format(new Date(item.createdAt), "PPpp"),
             record: (currentPage - 1) * rowsPerPage + i + 1,
             language: mapLanguage[item.languageId],
+            status: item.status,
             shared: Math.random() > 0.5,
           }));
 
