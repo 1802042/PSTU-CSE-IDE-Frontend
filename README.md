@@ -52,6 +52,10 @@
 
 ![User Dashboard](https://github.com/1802042/IDE-Frontend/blob/main/public/Dashboard.png)
 
+### 📊 User Submission Records
+
+![User Submission Recors](https://github.com/1802042/IDE-Frontend/blob/main/public/Records.png)
+
 ## 🛠️ Installation
 
 1. **Clone the repository**
