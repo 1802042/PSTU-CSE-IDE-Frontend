@@ -1,7 +1,7 @@
 # IDE-Frontend
 
 <div align="center">
-  <img src="public/home.png" alt="IDE Frontend Home Page" width="800"/>
+  <img src="https://github.com/1802042/IDE-Frontend/blob/main/public/Home.png" alt="IDE Frontend Home Page" width="800"/>
   
   A comprehensive online Integrated Development Environment (IDE) built with React, Tailwind CSS, and axios.
   
@@ -18,7 +18,7 @@
 - Real-time syntax highlighting and auto-completion
 - Smart error handling and debugging support
 
-![Code Editor Interface](public/editor.png)
+![Code Editor Interface](https://github.com/1802042/IDE-Frontend/blob/main/public/ide.png)
 
 ### 🎨 Customizable Interface
 
@@ -27,19 +27,16 @@
   - Monokai
   - Nord
   - Solarized (Dark & Light)
+  - GitHub (Dark & Light)
   - Tomorrow-Night-Blue
 - Adjustable font sizes
 - Customizable layout
 
-![Theme Selection](public/themes.png)
-
 ### 📤 Input/Output Management
 
-- Custom input field for program testing
-- Clear output display
-- Save and reuse test cases
-
-![Custom Input/Output](public/io.png)
+- Custom input field
+- Custom expected output field
+- Program output field
 
 ### 📁 File Management
 
@@ -47,24 +44,13 @@
 - Export your code in multiple formats
 - Auto-save functionality
 
-![File Management](public/files.png)
-
 ### 📊 User Dashboard
 
 - Track submission history
-- View performance analytics
+- View language and verdicts analytics
 - Manage saved code snippets
 
-![User Dashboard](public/dashboard.png)
-
-### 👨‍💼 Admin Features
-
-- Comprehensive user management
-- Submission monitoring
-- Usage analytics and reports
-- System health monitoring
-
-![Admin Interface](public/admin.png)
+![User Dashboard](https://github.com/1802042/IDE-Frontend/blob/main/public/Dashboard.png)
 
 ## 🛠️ Installation
 
@@ -130,18 +116,11 @@ Dumki, Patuakhali - 8602
 - **Email**: rony16@cse.pstu.ac.bd
 - **Phone**: (+880) 1742-059121
 
-## 🔗 Quick Links
-
-- [Home](https://ide-frontend-1802042.vercel.app)
-- [IDE](https://ide-frontend-1802042.vercel.app/editor)
-- [Records](https://ide-frontend-1802042.vercel.app/submissions)
-- [Pricing](https://ide-frontend-1802042.vercel.app/pricing)
-
 ## 📞 Follow Us
 
 - [GitHub](https://github.com/1802042)
-- [LinkedIn](https://www.linkedin.com/in/mdmahabuburrahmanrony)
-- [Facebook](https://www.facebook.com/mdmahabubur.rahmanrony)
+- [LinkedIn](www.linkedin.com/in/rm1802042)
+- [Facebook](https://www.facebook.com/knightshade.1802042/)
 
 ## 📄 License
 
