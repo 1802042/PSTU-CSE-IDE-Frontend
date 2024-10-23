@@ -97,7 +97,7 @@ const Home = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            PSTU CSE OFFLINE LAB IDE
+            PSTU CSE LAB IDE
           </motion.h2>
           <motion.p
             className="text-2xl text-blue-200 mb-10 max-w-3xl mx-auto"
