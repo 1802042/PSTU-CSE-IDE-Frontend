@@ -136,32 +136,6 @@ const Home = () => {
               </Button>
             </motion.div>
           </div>
-
-          {/* <motion.div
-            className="flex flex-col sm:flex-row justify-center gap-5"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleGetStarted}
-              // endIcon={<LoginIcon />}
-              className="px-7 py-3 border-2 bg-orange-500 hover:bg-orange-500 rounded-lg font-semibold transition-all duration-200"
-              color="warning"
-            >
-              Get Started
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleGetStarted}
-              className="px-7 py-3 border-2 hover:bg-red-700 hover:text-white rounded-lg font-semibold transition-all duration-200 "
-              color="error"
-            >
-              Live Demo
-            </Button>
-          </motion.div>*/}
         </motion.section>
 
         <motion.section
@@ -179,7 +153,7 @@ const Home = () => {
             </motion.div>
           </div>
         </motion.section>
-        <motion.section
+        {/* <motion.section
           className="mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -234,7 +208,7 @@ const Home = () => {
               </div>
             </motion.div>
           </div>
-        </motion.section>
+        </motion.section> */}
 
         <motion.section
           className="mb-10"
@@ -251,13 +225,13 @@ const Home = () => {
             />
             <FeatureCard
               icon={Code2}
-              title="Real-time Collaboration"
-              description="Work on projects together with real-time code sharing and editing."
+              title="Code Execution Against Test Data"
+              description="Supports Code Execution Against Test Data and Show Verdicts."
             />
             <FeatureCard
               icon={Book}
-              title="Integrated Learning"
-              description="Access tutorials and documentation right within the IDE for seamless learning."
+              title="Multiple Themes and Editor Options"
+              description="It Provides Access to Multiple Themes and Editor Options"
             />
           </div>
         </motion.section>

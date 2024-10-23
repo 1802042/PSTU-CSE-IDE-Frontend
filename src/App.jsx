@@ -11,6 +11,7 @@ import Contact from "./components/Contact.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import PersistLogin from "./components/PersistLogin.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
+import NotFound from "./components/NotFount.jsx";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
           </Route>
         </Route>
       </Route>
+      <Route path="*" element={<NotFound />}></Route>
     </Routes>
   );
 }
