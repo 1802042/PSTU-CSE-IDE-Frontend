@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useRefreshToken from "../hooks/useRefreshToken.js";
 import useAuth from "../hooks/useAuth.js";
+import { Audio } from "react-loader-spinner";
 
 const PersistLogin = () => {
   const refreshAccessToken = useRefreshToken();
@@ -26,8 +27,33 @@ const PersistLogin = () => {
     return () => (isMounted = false);
   }, []);
 
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }, []);
+
   return (
-    <>{!persist ? <Outlet /> : isLoading ? <p>Loading...</p> : <Outlet />}</>
+    <>
+      {!persist ? (
+        <Outlet />
+      ) : isLoading || loading ? (
+        <div className="flex flex-col h-[calc(100vh-20px-40px)] bg-gray-800 text-gray-200 py-5 justify-center items-center">
+          <Audio
+            height="100"
+            width="100"
+            radius="15"
+            color="red"
+            ariaLabel="loading"
+            wrapperStyle
+            wrapperClass
+          />
+        </div>
+      ) : (
+        <Outlet />
+      )}
+    </>
   );
 };
 
