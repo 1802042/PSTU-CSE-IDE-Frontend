@@ -1,10 +1,11 @@
 # IDE-Frontend
 
 <div align="center">
+  <img src="public/home.png" alt="IDE Frontend Home Page" width="800"/>
   
   A comprehensive online Integrated Development Environment (IDE) built with React, Tailwind CSS, and axios.
   
-  [![GitHub License](https://img.shields.io/github/license/1802042/IDE-Frontend)](https://github.com/1802042/IDE-Frontend/blob/6e04ff54db4659c693385af258802ba21882b979/LICENSE)
+  [![GitHub License](https://img.shields.io/github/license/1802042/IDE-Frontend)](https://github.com/1802042/IDE-Frontend/blob/main/LICENSE)
   [![GitHub Stars](https://img.shields.io/github/stars/1802042/IDE-Frontend)](https://github.com/1802042/IDE-Frontend/stargazers)
   [![GitHub Issues](https://img.shields.io/github/issues/1802042/IDE-Frontend)](https://github.com/1802042/IDE-Frontend/issues)
 </div>
@@ -17,7 +18,7 @@
 - Real-time syntax highlighting and auto-completion
 - Smart error handling and debugging support
 
-![Code Editor Screenshot](path/to/code-editor-screenshot.png)
+![Code Editor Interface](public/editor.png)
 
 ### 🎨 Customizable Interface
 
@@ -30,13 +31,15 @@
 - Adjustable font sizes
 - Customizable layout
 
+![Theme Selection](public/themes.png)
+
 ### 📤 Input/Output Management
 
 - Custom input field for program testing
 - Clear output display
 - Save and reuse test cases
 
-![Input Output Interface](path/to/input-output-screenshot.png)
+![Custom Input/Output](public/io.png)
 
 ### 📁 File Management
 
@@ -44,13 +47,15 @@
 - Export your code in multiple formats
 - Auto-save functionality
 
+![File Management](public/files.png)
+
 ### 📊 User Dashboard
 
 - Track submission history
 - View performance analytics
 - Manage saved code snippets
 
-![User Dashboard](path/to/dashboard-screenshot.png)
+![User Dashboard](public/dashboard.png)
 
 ### 👨‍💼 Admin Features
 
@@ -58,6 +63,8 @@
 - Submission monitoring
 - Usage analytics and reports
 - System health monitoring
+
+![Admin Interface](public/admin.png)
 
 ## 🛠️ Installation
 
@@ -125,20 +132,20 @@ Dumki, Patuakhali - 8602
 
 ## 🔗 Quick Links
 
-- [Home](path-to-home)
-- [IDE](path-to-ide)
-- [Records](path-to-records)
-- [Pricing](path-to-pricing)
+- [Home](https://ide-frontend-1802042.vercel.app)
+- [IDE](https://ide-frontend-1802042.vercel.app/editor)
+- [Records](https://ide-frontend-1802042.vercel.app/submissions)
+- [Pricing](https://ide-frontend-1802042.vercel.app/pricing)
 
 ## 📞 Follow Us
 
 - [GitHub](https://github.com/1802042)
-- [LinkedIn](your-linkedin-url)
-- [Facebook](your-facebook-url)
+- [LinkedIn](https://www.linkedin.com/in/mdmahabuburrahmanrony)
+- [Facebook](https://www.facebook.com/mdmahabubur.rahmanrony)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](https://github.com/1802042/IDE-Frontend/blob/main/LICENSE) file for details.
 
 ---
 
