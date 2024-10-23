@@ -160,3 +160,48 @@ public class Main {
 }
 `,
 };
+
+export const mapIdToVerdict = {
+  1: "Queue",
+  2: "Pending",
+  3: "AC",
+  4: "WA",
+  5: "TLE",
+  6: "CE",
+  7: "RTE",
+};
+
+export const mapIdToLanguage = {
+  50: "c",
+  54: "cpp",
+  62: "java",
+  63: "javascript",
+  71: "python",
+};
+
+export const VERDICT_COLORS = {
+  "In Queue": "#e5e7eb", // light gray
+  Processing: "#3b82f6", // blue
+  Accepted: "#4ade80", // green
+  "Wrong Answer": "#ef4444", // red
+  "Time Limit Exceeded": "#f97316", // orange
+  "Compilation Error": "#a855f7", // purple
+  "Runtime Error (SIGSEGV)": "#f43f5e", // rose
+  "Runtime Error (SIGXFSZ)": "#f43f5e", // rose
+  "Runtime Error (SIGFPE)": "#f43f5e", // rose
+  "Runtime Error (SIGABRT)": "#f43f5e", // rose
+  "Runtime Error (NZEC)": "#f43f5e", // rose
+  "Runtime Error (Other)": "#f43f5e", // rose
+  "Internal Error": "#facc15", // yellow
+  "Exec Format Error": "#f87171", // light red
+};
+
+export const VERDICT_COLORS_SHORT = {
+  Queue: "#e5e7eb", // light gray
+  Pending: "#3b82f6", // blue
+  AC: "#4ade80", // green
+  WA: "#ef4444", // red
+  TLE: "#f97316", // orange
+  CE: "#a855f7", // purple
+  RTE: "#f43f5e", // rose
+};

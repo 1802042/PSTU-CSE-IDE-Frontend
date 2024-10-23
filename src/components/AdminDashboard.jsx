@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   PieChart,
   Pie,
@@ -12,19 +13,22 @@ import {
   YAxis,
 } from "recharts";
 import { format } from "date-fns";
-import DataTable from "./Records.jsx"; // Import DataTable from Records.jsx
+import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
+import { isCanceled } from "../api/axios.js";
+import {
+  mapLanguage,
+  mapIdToLanguage,
+  mapIdToVerdict,
+  VERDICT_COLORS,
+  VERDICT_COLORS_SHORT,
+} from "../constants.js";
+import { toast, Bounce } from "react-toastify";
+import DataTable from "./DataTable.jsx";
+import Pagination from "./Pagination.jsx";
 
-const VERDICT_COLORS = {
-  "In Queue": "#64748b",
-  Processing: "#3b82f6",
-  Accepted: "#22c55e",
-  "Wrong Answer": "#ef4444",
-  "Time Limit Exceeded": "#f97316",
-  "Compilation Error": "#a855f7",
-  "Runtime Error": "#f43f5e",
-  "Internal Error": "#facc15",
-  "Exec Format Error": "#f87171",
-};
+const SUBMISSION_URL = "/submissions";
+const ANALYTICS_URL = "/submissions/analytics";
+const ANALYTICS_SUBMISSION_URL = "/submissions/analytics-submission";
 
 const LANGUAGES = ["C", "C++", "Java", "JavaScript", "Python"];
 
@@ -46,71 +50,137 @@ const CustomTooltip = ({ active, payload }) => {
 
 const AdminDashboard = () => {
   const [data, setData] = useState([]);
-  const [analytics, setAnalytics] = useState({
-    languageStats: [],
-    verdictStats: [],
-  });
+  const [analytics, setAnalytics] = useState({});
   const [filter, setFilter] = useState({ language: "", status: "" });
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [startPage, setStartPage] = useState(1);
+  const rowsPerPage = 10;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // Simulating API call
-      const response = await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: Array.from({ length: 100 }, (_, i) => ({
-              id: i + 1,
-              createdAt: new Date(
-                Date.now() - Math.floor(Math.random() * 10000000000)
-              ),
-              language: LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)],
-              status:
-                Object.keys(VERDICT_COLORS)[
-                  Math.floor(Math.random() * Object.keys(VERDICT_COLORS).length)
-                ],
-              shared: Math.random() > 0.5,
-            })),
-          });
-        }, 500);
-      });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const axiosPrivate = useAxiosPrivate();
 
-      const transformedData = response.data.map((item) => ({
-        ...item,
-        date: format(new Date(item.createdAt), "PPpp"),
-      }));
-
-      setData(transformedData);
-      updateAnalytics(transformedData);
-    };
-
-    fetchData();
-  }, []);
-
-  const updateAnalytics = (data) => {
-    const languageCounts = {};
-    const verdictCounts = {};
-    let total = 0;
-
-    data.forEach((item) => {
-      languageCounts[item.language] = (languageCounts[item.language] || 0) + 1;
-      verdictCounts[item.status] = (verdictCounts[item.status] || 0) + 1;
-      total++;
-    });
-
-    setAnalytics({
-      languageStats: Object.entries(languageCounts).map(([name, value]) => ({
-        name,
-        value,
-        total,
-      })),
-      verdictStats: Object.entries(verdictCounts).map(([name, value]) => ({
-        name,
-        value,
-        total,
-      })),
+  const fireToast = (message) => {
+    toast.error(message, {
+      position: "top-center",
+      autoClose: 3500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
     });
   };
+
+  useEffect(() => {
+    console.log(analytics);
+  }, [analytics]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const getAnalytics = async () => {
+      try {
+        const response = await axiosPrivate.get(ANALYTICS_URL, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
+
+        if (isMounted) {
+          setAnalytics(response.data.data);
+        }
+      } catch (err) {
+        if (isCanceled(err)) {
+        } else {
+          const status = err.response?.data?.status;
+          if (!status) {
+            fireToast("Something Went Wrong!");
+          } else if (status == "404") {
+            fireToast("username not found!");
+          } else if (status == 401 || status == 403) {
+            navigate("/login", {
+              state: { from: location },
+              replace: true,
+            });
+          } else if (status == "500") {
+            fireToast("Something Went Wrong When Logging! Try Again!");
+          } else {
+            fireToast("Something Went Wrong!");
+          }
+        }
+      }
+    };
+
+    getAnalytics();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const getSubmissions = async () => {
+      try {
+        const response = await axiosPrivate.get(ANALYTICS_SUBMISSION_URL, {
+          withCredentials: true,
+          signal: controller.signal,
+          params: {
+            page: currentPage,
+            count: rowsPerPage,
+          },
+        });
+
+        if (isMounted) {
+          const transformedData = response.data?.data.map((item, i) => ({
+            id: (currentPage - 1) * rowsPerPage + i + 1,
+            date: format(new Date(item.createdAt), "PPpp"),
+            username: item.username,
+            record: (currentPage - 1) * rowsPerPage + i + 1,
+            language: mapLanguage[item.languageId],
+            status: item.status,
+            shared: Math.random() > 0.5,
+          }));
+
+          setData(transformedData);
+        }
+      } catch (err) {
+        if (isCanceled(err)) {
+        } else {
+          const status = err.response?.data?.status;
+          if (!status) {
+            fireToast("Something Went Wrong!");
+          } else if (status == "400") {
+            fireToast("Wrong Query Params!");
+          } else if (status == "500") {
+          } else if (status == 401 || status == 403) {
+            navigate("/login", {
+              state: { from: location },
+              replace: true,
+            });
+          } else if (status == "500") {
+            fireToast("Something Went Wrong When Logging! Try Again!");
+          } else {
+            fireToast("Something Went Wrong!");
+          }
+        }
+      }
+    };
+
+    getSubmissions();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [currentPage]);
 
   const filteredData = data.filter(
     (item) =>
@@ -118,6 +188,7 @@ const AdminDashboard = () => {
       (filter.status === "" || item.status === filter.status) &&
       (search === "" ||
         item.id.toString().includes(search) ||
+        item.username.toString().includes(search) ||
         item.language.toLowerCase().includes(search.toLowerCase()) ||
         item.status.toLowerCase().includes(search.toLowerCase()))
   );
@@ -130,20 +201,58 @@ const AdminDashboard = () => {
     );
   };
 
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+    if (currentPage === startPage + 4) {
+      setStartPage((prevStart) => prevStart + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+      if (currentPage === startPage) {
+        setStartPage((prevStart) => prevStart - 1);
+      }
+    }
+  };
+
+  // Transform analytics data for charts
+  const languageData = Object.entries(analytics.language || {}).map(
+    ([id, count]) => ({
+      name: mapIdToLanguage[id],
+      value: count,
+      total: Object.values(analytics.language || {}).reduce(
+        (acc, val) => acc + val,
+        0
+      ),
+    })
+  );
+
+  const verdictData = Object.entries(analytics.verdict || {}).map(
+    ([id, count]) => ({
+      name: mapIdToVerdict[id],
+      value: count,
+      total: Object.values(analytics.verdict || {}).reduce(
+        (acc, val) => acc + val,
+        0
+      ),
+    })
+  );
+
   return (
-    <div className="flex flex-col items-center h-screen overflow-y-auto bg-gray-900 text-white p-4">
-      <div className="w-full px-10">
-        <h1 className="text-4xl font-bold mb-8 text-blue-400">
-          Admin Dashboard
-        </h1>
+    <div className="flex flex-col items-center bg-gray-800 text-gray-200 py-5">
+      <div className="w-full max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="text-2xl font-bold mb-4">Language Distribution</h2>
-            <div className="h-64">
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Language Distribution
+            </h2>
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={analytics.languageStats}
+                    data={languageData}
                     cx="50%"
                     cy="50%"
                     outerRadius="80%"
@@ -151,11 +260,11 @@ const AdminDashboard = () => {
                     dataKey="value"
                     nameKey="name"
                     label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
+                      `${name} ${(percent * 100).toFixed(2)}%`
                     }
                     animationDuration={500}
                   >
-                    {analytics.languageStats.map((entry, index) => (
+                    {languageData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={
@@ -173,19 +282,21 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="bg-gray-800 rounded-lg p-4">
-            <h2 className="text-2xl font-bold mb-4">Submission Verdicts</h2>
-            <div className="h-64">
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Submission Verdicts
+            </h2>
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.verdictStats}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                <BarChart data={verdictData}>
+                  <XAxis dataKey="name" tick={{ fill: "#FFFFFF" }} />
+                  <YAxis tick={{ fill: "#FFFFFF" }} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Bar dataKey="value" fill="#8884d8">
-                    {analytics.verdictStats.map((entry, index) => (
+                  <Bar dataKey="value" fill="#1F2937">
+                    {verdictData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={VERDICT_COLORS[entry.name] || "#8884d8"}
+                        fill={VERDICT_COLORS_SHORT[entry.name] || "#1F2937"}
                       />
                     ))}
                   </Bar>
@@ -266,6 +377,13 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div>
+            <Pagination
+              currentPage={currentPage}
+              startPage={startPage}
+              handlePrevPage={handlePrevPage}
+              handleNextPage={handleNextPage}
+              setCurrentPage={setCurrentPage}
+            />
             <DataTable
               currentData={filteredData}
               toggleShareStatus={toggleShareStatus}

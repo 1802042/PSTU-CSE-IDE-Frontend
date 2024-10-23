@@ -159,28 +159,33 @@ const Header = () => {
             </Link>
             <nav className="md:block">
               <ul className="flex space-x-6">
-                {["Home", "IDE", "Records", "Pricing", "Contact"].map(
-                  (item) => (
-                    <li key={item}>
-                      <NavLink
-                        to={`/${
-                          item == "Home"
-                            ? ""
-                            : item == "IDE"
-                            ? "editor"
-                            : item.toLowerCase()
-                        }`}
-                        className={({ isActive }) =>
-                          `${
-                            isActive ? "text-purple-400" : ""
-                          } hover:text-purple-400 transition-colors`
-                        }
-                      >
-                        {item}
-                      </NavLink>
-                    </li>
-                  )
-                )}
+                {[
+                  "Home",
+                  "Dashboard",
+                  "IDE",
+                  "Records",
+                  "Pricing",
+                  "Contact",
+                ].map((item) => (
+                  <li key={item}>
+                    <NavLink
+                      to={`/${
+                        item == "Home"
+                          ? ""
+                          : item == "IDE"
+                          ? "editor"
+                          : item.toLowerCase()
+                      }`}
+                      className={({ isActive }) =>
+                        `${
+                          isActive ? "text-purple-400" : ""
+                        } hover:text-purple-400 transition-colors`
+                      }
+                    >
+                      {item}
+                    </NavLink>
+                  </li>
+                ))}
               </ul>
             </nav>
           </div>
