@@ -233,7 +233,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!avatar || !formData) {
-      console.log("Missing Fields");
+      fireToast("Insert into all the fields!", false);
     } else {
       const formDataToSend = new FormData();
       formDataToSend.append("username", formData.username);

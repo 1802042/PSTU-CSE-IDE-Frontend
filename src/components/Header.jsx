@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   Avatar,
@@ -23,14 +23,17 @@ import {
 } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth.js"; // Adjust the path as needed
 import useLogout from "../hooks/useLogout.js";
+import useRefreshToken from "../hooks/useRefreshToken.js";
 
 const UserMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMenuOpen = Boolean(anchorEl);
-  const { auth, setAuth } = useAuth();
+  const { auth } = useAuth();
   const logout = useLogout();
+  const refreshAccessToken = useRefreshToken();
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -56,6 +59,40 @@ const UserMenu = () => {
       replace: true,
     });
   };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      if (!auth?.user) {
+        await refreshAccessToken();
+      }
+    };
+    checkUser();
+  }, [auth]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+  }, []);
+
+  if (!auth?.user) {
+    return (
+      <>
+        {isLoading ? (
+          <> </>
+        ) : (
+          <Button
+            variant="contained"
+            onClick={handleLogin}
+            startIcon={<LoginIcon />}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            Login
+          </Button>
+        )}
+      </>
+    );
+  }
 
   // Check if user exists in auth object
   if (!auth?.user) {

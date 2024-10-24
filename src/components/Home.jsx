@@ -92,12 +92,12 @@ const Home = () => {
           transition={{ duration: 1 }}
         >
           <motion.h2
-            className="text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
+            className="text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            PSTU CSE LAB IDE
+            WELCOME TO PSTU LAB IDE!
           </motion.h2>
           <motion.p
             className="text-2xl text-blue-200 mb-10 max-w-3xl mx-auto"

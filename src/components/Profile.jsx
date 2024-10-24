@@ -146,10 +146,11 @@ const Profile = () => {
       fireToast("Password updated successfully!", true);
     } catch (err) {
       const status = err.response?.data?.status;
+      console.log(`status  =  ${status}`);
       if (!status) {
-        fireToast("Something Went Wrong!");
+        fireToast("Something Went Wrong 1!");
       } else if (status == "400") {
-        fireToast("Fields can not be empty!");
+        fireToast("Passwords must be atlest 8 characters!");
       } else if (status == 401) {
         fireToast("Incorrect old password!", false);
       } else if (status == 403) {
@@ -211,12 +212,6 @@ const Profile = () => {
               <div className="mt-4 text-center">
                 <p className="text-sm text-gray-400">
                   Joined {formData.joinDate}
-                </p>
-                <p className="text-sm text-gray-400">
-                  Submissions:{" "}
-                  <span className="text-blue-400 font-semibold">
-                    {submissionCount}
-                  </span>
                 </p>
               </div>
             </div>

@@ -46,10 +46,10 @@ const Pricing = () => {
   const tiers = [
     {
       name: "Free",
-      price: "$0",
+      price: "0",
       description: "For hobbyists and learners",
       features: [
-        "1 project",
+        "100 Free submissions",
         "100MB storage",
         "Community support",
         "Basic IDE features",
@@ -57,10 +57,10 @@ const Pricing = () => {
     },
     {
       name: "Pro",
-      price: "$19",
+      price: "1,000৳",
       description: "For professional developers",
       features: [
-        "Unlimited projects",
+        "1000 Submissions per day",
         "10GB storage",
         "Priority support",
         "Advanced IDE features",
@@ -73,7 +73,7 @@ const Pricing = () => {
       price: "Custom",
       description: "For teams and organizations",
       features: [
-        "Unlimited projects",
+        "Unlimited Submissions",
         "Unlimited storage",
         "24/7 dedicated support",
         "Advanced security features",

@@ -1,10 +1,9 @@
-import { useEffect } from "react";
 import axios from "../api/axios.js";
 import useAuth from "./useAuth.js";
 
 const TOKEN_URL = "users/refresh-token";
 const useRefreshToken = () => {
-  const { auth, setAuth } = useAuth();
+  const { setAuth } = useAuth();
 
   const refreshAccessToken = async () => {
     const response = await axios.get(TOKEN_URL, {
