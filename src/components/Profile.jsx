@@ -4,6 +4,7 @@ import useAuth from "../hooks/useAuth.js";
 import { format } from "date-fns";
 import { axiosPrivate } from "../api/axios.js";
 import { toast, Bounce } from "react-toastify";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const PASSWORD_URL = "users/reset-password";
 const AVATAR_URL = "users/reset-avatar";
@@ -15,6 +16,9 @@ const Profile = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [profileImage, setProfileImage] = useState(auth.user?.avatarUrl);
+  const navigate = useNavigate();
+  const location = useLocation();
+
   let keepImage = null;
   let submissionCount = 131;
 
@@ -101,9 +105,12 @@ const Profile = () => {
         fireToast("Something Went Wrong!", false);
       } else if (status == "400") {
         fireToast("Upload file missing!", false);
-      } else if (status == "413") {
       } else if (status == "401" || status == "403") {
-        fireToast("Unauthorize access! Please login", false);
+        fireToast("Please login to perform this operation!", false);
+        navigate("/login", {
+          state: { from: location },
+          replace: true,
+        });
       } else if (status == "413") {
         fireToast("Too Large Image Uploaded!", false);
       } else if (status == "500") {
@@ -143,8 +150,14 @@ const Profile = () => {
         fireToast("Something Went Wrong!");
       } else if (status == "400") {
         fireToast("Fields can not be empty!");
-      } else if (status == 401 || status == 403) {
+      } else if (status == 401) {
         fireToast("Incorrect old password!", false);
+      } else if (status == 403) {
+        fireToast("Please login to perform this operation!", false);
+        navigate("/login", {
+          state: { from: location },
+          replace: true,
+        });
       } else if (status == "500") {
         fireToast("Something Went Wrong When Logging! Try Again!");
       } else {

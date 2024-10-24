@@ -25,6 +25,7 @@ import {
 import { toast, Bounce } from "react-toastify";
 import DataTable from "./DataTable.jsx";
 import Pagination from "./Pagination.jsx";
+import useAuth from "../hooks/useAuth.js";
 
 const SUBMISSION_URL = "/submissions";
 const ANALYTICS_URL = "/submissions/analytics";
@@ -56,10 +57,20 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [startPage, setStartPage] = useState(1);
   const rowsPerPage = 10;
+  const { auth } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
   const axiosPrivate = useAxiosPrivate();
+
+  useEffect(() => {
+    if (auth.user?.role !== "admin") {
+      navigate("/not-found", {
+        state: { from: location },
+        replace: true,
+      });
+    }
+  }, [auth, navigate]);
 
   const fireToast = (message) => {
     toast.error(message, {
@@ -237,8 +248,8 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="h-[calc(100vh-20px-40px)] overflow-auto flex flex-col items-center bg-gray-800 text-gray-200 py-5">
-      <div className="w-full max-w-7xl">
+    <div className="flex flex-col items-center bg-gray-800 text-gray-200 py-5 overflow-hidden">
+      <div className="w-full max-w-7xl flex-1 overflow-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="bg-gray-800 rounded-lg p-4">
             <h2 className="text-2xl font-bold mb-4 text-center">
@@ -301,7 +312,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-800 rounded-lg p-4">
+        <div className="bg-gray-800 rounded-lg p-4 ">
           <h2 className="text-2xl font-bold mb-4">Recent Submissions</h2>
           <div className="flex justify-between mb-4">
             <div className="flex gap-4">

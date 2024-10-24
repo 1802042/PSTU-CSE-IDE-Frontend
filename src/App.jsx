@@ -30,11 +30,15 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route path="/editor" element={<Ide />} />
             <Route path="/records" element={<Record />} />
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route
+              path="/dashboard"
+              element={<AdminDashboard userRole={"admin"} />}
+            />
             <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
       </Route>
+      <Route path="/not-found" element={<NotFound />}></Route>
       <Route path="*" element={<NotFound />}></Route>
     </Routes>
   );

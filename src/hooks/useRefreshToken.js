@@ -11,8 +11,6 @@ const useRefreshToken = () => {
       withCredentials: true,
     });
 
-    console.log(`refresh token : \n ${JSON.stringify(response.data?.data)}`);
-
     setAuth(response.data?.data);
     return response.data?.data?.accessToken;
   };

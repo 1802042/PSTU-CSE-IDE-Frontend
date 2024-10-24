@@ -22,12 +22,15 @@ const PersistLogin = () => {
       }
     };
 
-    !auth?.accessToken && persist ? verifyRefreshToken() : setIsLoading(false);
+    !auth?.accessToken && !auth?.user && persist
+      ? verifyRefreshToken()
+      : setIsLoading(false);
 
     return () => (isMounted = false);
   }, []);
 
   const [loading, setLoading] = useState(true);
+  // delay for loader to run
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
