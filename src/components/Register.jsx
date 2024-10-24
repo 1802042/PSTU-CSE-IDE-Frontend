@@ -243,23 +243,22 @@ export default function Register() {
       formDataToSend.append("avatar", avatar);
 
       try {
-        const response = await axios.post(REGISTER_URL, formDataToSend, {
+        await axios.post(REGISTER_URL, formDataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         });
 
         fireToast("You have registered successfully!", true);
-        setTimeout(() => {
-          navigate("/login");
-          setFormData({
-            username: "",
-            password: "",
-            email: "",
-            fullname: "",
-          });
-          setAvatar(null);
-          setPreviewAvatar(null);
-        }, 2000);
+
+        setFormData({
+          username: "",
+          password: "",
+          email: "",
+          fullname: "",
+        });
+        setAvatar(null);
+        setPreviewAvatar(null);
+        navigate("/login");
       } catch (error) {
         usernameRef.current.focus();
         const status = error.response?.data?.status;
@@ -281,7 +280,7 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row">
+    <div className="h-[calc(100vh-20px-40px)] flex flex-col lg:flex-row">
       <ToastContainer />
       <div className="lg:flex-1 bg-gray-900 text-white p-8 lg:p-16 flex items-center justify-center relative overflow-hidden">
         <div className="w-full max-w-md z-10">

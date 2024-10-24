@@ -12,6 +12,7 @@ import RequireAuth from "./components/RequireAuth.jsx";
 import PersistLogin from "./components/PersistLogin.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
 import NotFound from "./components/NotFount.jsx";
+import Profile from "./components/Profile.jsx";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/editor" element={<Ide />} />
             <Route path="/records" element={<Record />} />
             <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
       </Route>

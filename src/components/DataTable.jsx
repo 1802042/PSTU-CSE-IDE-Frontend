@@ -26,7 +26,6 @@ const CustomButton = ({ onClick, disabled, children, isActive }) => (
 
 const DataTable = ({ currentData, toggleShareStatus }) => (
   <div className="flex-grow overflow-auto">
-    {console.log(JSON.stringify(currentData))}
     <table className="w-full border-collapse">
       <thead>
         <tr className="bg-gray-700">

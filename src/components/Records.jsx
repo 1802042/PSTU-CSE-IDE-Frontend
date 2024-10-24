@@ -51,8 +51,6 @@ const Record = () => {
           },
         });
 
-        console.log(JSON.stringify(response.data.data));
-
         if (isMounted) {
           const transformedData = response.data?.data.map((item, i) => ({
             id: (currentPage - 1) * rowsPerPage + i + 1,
@@ -63,7 +61,7 @@ const Record = () => {
             status: item.status,
             shared: Math.random() > 0.5,
           }));
-          console.log(JSON.stringify(transformedData));
+
           setData(transformedData);
         }
       } catch (err) {
@@ -96,10 +94,6 @@ const Record = () => {
       controller.abort();
     };
   }, [currentPage]);
-
-  useEffect(() => {
-    console.log(JSON.stringify(data));
-  }, data);
 
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);

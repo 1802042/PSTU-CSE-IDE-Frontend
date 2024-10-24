@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Panel } from "react-resizable-panels";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload, XCircle } from "lucide-react";
 import Button from "@mui/material/Button";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
@@ -46,6 +46,8 @@ const Header = ({
   handleExportCode,
   handleImportCode,
   handleRunCode,
+  handleCancelSubmission,
+  isProcessing,
   language,
   theme,
   handleLanguageChange,
@@ -85,15 +87,27 @@ const Header = ({
         {"Import"}
       </Button>
 
-      <Button
-        variant="outlined"
-        onClick={handleRunCode}
-        startIcon={<PlayCircleIcon />}
-        className="px-4 py-2  hover:text-white hover:bg-green-600 rounded"
-        color="success"
-      >
-        {"Run"}
-      </Button>
+      {isProcessing ? (
+        <Button
+          variant="outlined"
+          onClick={handleCancelSubmission}
+          startIcon={<XCircle size={"20"} />}
+          className="px-4 py-2 hover:text-white hover:bg-red-600 rounded"
+          color="error"
+        >
+          {"Cancel"}
+        </Button>
+      ) : (
+        <Button
+          variant="outlined"
+          onClick={handleRunCode}
+          startIcon={<PlayCircleIcon />}
+          className="px-4 py-2 hover:text-white hover:bg-green-600 rounded"
+          color="success"
+        >
+          {"Run"}
+        </Button>
+      )}
     </div>
     <div className="flex items-center space-x-4">
       <select
@@ -247,9 +261,13 @@ const Ide = () => {
   const [expectedOutput, setExpectedOutput] = useState("");
   const [fontSize, setFontSize] = useState(18);
   const [resultId, setResultId] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
+  const intervalRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   const axiosPrivate = useAxiosPrivate();
   const navigate = useNavigate();
@@ -300,40 +318,77 @@ const Ide = () => {
         });
   };
 
-  const fetchResult = (submissionId) => {
-    return new Promise((resolve, reject) => {
-      let intervalId;
-      try {
-        intervalId = setInterval(async () => {
-          const response = await axiosPrivate.get(
-            `${RESULT_URL}/${submissionId}`,
-            {
-              withCredentials: true,
-              params: {
-                submissionId,
-              },
-            }
-          );
+  const handleCancelSubmission = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setIsProcessing(false);
+    setResultId(null);
+    setOutput("Submission cancelled.");
+  }, []);
 
-          const result = response.data?.data;
-          if (result?.status && result?.status !== "Processing") {
-            clearInterval(intervalId);
-            resolve(result);
+  useEffect(() => {
+    return () => {
+      handleCancelSubmission();
+    };
+  }, [handleCancelSubmission]);
+
+  const fetchResult = (submissionId, intervalRef, abortController) => {
+    return new Promise((resolve, reject) => {
+      try {
+        intervalRef.current = setInterval(async () => {
+          try {
+            const response = await axiosPrivate.get(
+              `${RESULT_URL}/${submissionId}`,
+              {
+                withCredentials: true,
+                params: {
+                  submissionId,
+                },
+                signal: abortController.signal,
+              }
+            );
+
+            const result = response.data?.data;
+            if (result?.status && result?.status !== "Processing") {
+              clearInterval(intervalRef.current);
+              setIsProcessing(false);
+              resolve(result);
+            }
+          } catch (err) {
+            if (err.name === "AbortError") {
+              console.log("Fetch aborted");
+              setIsProcessing(false);
+            } else {
+              clearInterval(intervalRef.current);
+              setIsProcessing(false);
+              reject(err);
+            }
           }
         }, 1500);
 
         setTimeout(() => {
-          clearInterval(intervalId);
+          clearInterval(intervalRef.current);
+          setIsProcessing(false);
           reject(new Error("Timeout: Result not obtained within 10 seconds"));
         }, 20000);
       } catch (err) {
-        clearInterval(intervalId);
+        clearInterval(intervalRef.current);
+        setIsProcessing(false);
         reject(err);
       }
     });
   };
 
   const handleRunCode = async () => {
+    if (isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true);
     const editorValue = editorRef.current.getValue();
     const requestData = {
       sourceCode: editorValue,
@@ -357,6 +412,7 @@ const Ide = () => {
       setOutput(`[${result?.status}...]`);
     } catch (error) {
       setOutput("Error executing code.");
+      setIsProcessing(false);
       const status = error?.status;
       console.log(error);
       if (!status) {
@@ -374,11 +430,15 @@ const Ide = () => {
     }
   };
 
-  const [showConfetti, setShowConfetti] = useState(false);
   useEffect(() => {
     const getResult = async () => {
+      abortControllerRef.current = new AbortController();
       try {
-        const submissionResult = await fetchResult(resultId);
+        const submissionResult = await fetchResult(
+          resultId,
+          intervalRef,
+          abortControllerRef.current
+        );
         if (submissionResult.status == "Accepted") {
           fireToast(submissionResult.status, true);
           setShowConfetti(true);
@@ -404,10 +464,10 @@ const Ide = () => {
           parseInt(submissionResult.statusId, 10) >= 6 ? errorFormat : okFormat
         );
       } catch (error) {
-        setOutput("Error executing code.>");
+        setOutput("Error executing code.");
         const status = error?.status;
         if (!status) {
-          fireToast("Something went wrong! Try again!", false);
+          // fireToast("Something went wrong! Try again!", false);
         } else if (status == 401 || status == 403) {
           navigate("/login", {
             state: { from: location },
@@ -424,6 +484,15 @@ const Ide = () => {
     if (resultId) {
       getResult();
     }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [resultId]);
 
   const handleLanguageChange = (event) => {
@@ -499,6 +568,8 @@ const Ide = () => {
         handleExportCode={handleExportCode}
         handleImportCode={handleImportCode}
         handleRunCode={handleRunCode}
+        handleCancelSubmission={handleCancelSubmission}
+        isProcessing={isProcessing}
         language={language}
         theme={theme}
         handleLanguageChange={handleLanguageChange}

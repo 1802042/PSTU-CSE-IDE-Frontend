@@ -168,7 +168,7 @@ const Login = () => {
   }, [persist]);
 
   return (
-    <div className="flex flex-col lg:flex-row">
+    <div className="h-[calc(100vh-20px-40px)] flex flex-col lg:flex-row">
       <div className="lg:flex-1 bg-gray-900 text-white p-8 lg:p-16 flex items-center justify-center relative overflow-hidden">
         <div className="w-full max-w-md z-10">
           <h2 className="text-3xl font-bold text-white mb-8">

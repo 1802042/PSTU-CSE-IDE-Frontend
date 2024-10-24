@@ -76,10 +76,6 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    console.log(analytics);
-  }, [analytics]);
-
-  useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
@@ -241,7 +237,7 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="flex flex-col items-center bg-gray-800 text-gray-200 py-5">
+    <div className="h-[calc(100vh-20px-40px)] overflow-auto flex flex-col items-center bg-gray-800 text-gray-200 py-5">
       <div className="w-full max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="bg-gray-800 rounded-lg p-4">
