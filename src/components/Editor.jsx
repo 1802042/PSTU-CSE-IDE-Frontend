@@ -18,6 +18,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate.js";
 import { toast, Bounce } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import Confetti from "react-confetti";
+import useIde from "../hooks/useIde.js";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -95,7 +96,7 @@ const Header = ({
           className="px-4 py-2 hover:text-white hover:bg-red-600 rounded"
           color="error"
         >
-          {"Cancel"}
+          {"Cancel Run"}
         </Button>
       ) : (
         <Button
@@ -253,20 +254,41 @@ const InputOutputPanel = ({
 };
 
 const Ide = () => {
-  const [code, setCode] = useState(languageTemplates.cpp);
-  const [language, setLanguage] = useState("cpp");
-  const [theme, setTheme] = useState("dracula");
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
-  const [expectedOutput, setExpectedOutput] = useState("");
-  const [fontSize, setFontSize] = useState(18);
-  const [resultId, setResultId] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [activePage, setActivePage] = useState(false);
+
+  useEffect(() => {
+    setActivePage(true);
+    return () => {
+      setActivePage((pre) => !pre);
+    };
+  }, []);
+
+  const {
+    code,
+    setCode,
+    language,
+    setLanguage,
+    theme,
+    setTheme,
+    input,
+    setInput,
+    output,
+    setOutput,
+    expectedOutput,
+    setExpectedOutput,
+    fontSize,
+    setFontSize,
+    resultId,
+    setResultId,
+    isProcessing,
+    setIsProcessing,
+  } = useIde();
 
   const editorRef = useRef(null);
   const fileInputRef = useRef(null);
   const intervalRef = useRef(null);
+  const finalIntervalRef = useRef(null);
   const abortControllerRef = useRef(null);
 
   const axiosPrivate = useAxiosPrivate();
@@ -289,33 +311,35 @@ const Ide = () => {
       monaco.editor.defineTheme(name, data);
     });
 
-    monaco.editor.setTheme("dracula");
+    monaco.editor.setTheme(theme);
   };
 
   const fireToast = (message, success) => {
-    success
-      ? toast.success(message, {
-          position: "top-center",
-          autoClose: 3500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        })
-      : toast.error(message, {
-          position: "top-center",
-          autoClose: 3500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        });
+    if (activePage) {
+      success
+        ? toast.success(message, {
+            position: "top-center",
+            autoClose: 3500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          })
+        : toast.error(message, {
+            position: "top-center",
+            autoClose: 3500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            transition: Bounce,
+          });
+    }
   };
 
   const handleCancelSubmission = useCallback(() => {
@@ -331,10 +355,14 @@ const Ide = () => {
   }, []);
 
   useEffect(() => {
-    return () => {
-      handleCancelSubmission();
-    };
-  }, [handleCancelSubmission]);
+    console.log(`isProcessing : ${isProcessing}`);
+  }, []);
+
+  // useEffect(() => {
+  //   return () => {
+  //     handleCancelSubmission();
+  //   };
+  // }, [handleCancelSubmission]);
 
   const fetchResult = (submissionId, intervalRef, abortController) => {
     return new Promise((resolve, reject) => {
@@ -354,30 +382,44 @@ const Ide = () => {
 
             const result = response.data?.data;
             if (result?.status && result?.status !== "Processing") {
-              clearInterval(intervalRef.current);
-              setIsProcessing(false);
               resolve(result);
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+              }
+              if (finalIntervalRef.current) {
+                clearInterval(finalIntervalRef.current);
+              }
             }
           } catch (err) {
-            if (err.name === "AbortError") {
-              console.log("Fetch aborted");
-              setIsProcessing(false);
-            } else {
+            reject(err);
+            // if (err.name !== "AbortError") {
+            if (intervalRef.current) {
               clearInterval(intervalRef.current);
-              setIsProcessing(false);
-              reject(err);
             }
+            if (finalIntervalRef.current) {
+              clearInterval(finalIntervalRef.current);
+            }
+            // }
           }
         }, 1500);
 
-        setTimeout(() => {
-          clearInterval(intervalRef.current);
-          setIsProcessing(false);
-          reject(new Error("Timeout: Result not obtained within 10 seconds"));
+        finalIntervalRef.current = setTimeout(() => {
+          if (isProcessing) {
+            console.log("culprit <");
+
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            reject(new Error("Timeout"));
+
+            console.log("culprit >");
+          }
         }, 20000);
       } catch (err) {
-        clearInterval(intervalRef.current);
-        setIsProcessing(false);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+        if (finalIntervalRef.current) {
+          clearInterval(finalIntervalRef.current);
+        }
         reject(err);
       }
     });
@@ -411,10 +453,10 @@ const Ide = () => {
       setResultId(result?._id || resultId);
       setOutput(`[${result?.status}...]`);
     } catch (error) {
-      setOutput("Error executing code.");
+      setOutput("Error submitting code.");
       setIsProcessing(false);
+
       const status = error?.status;
-      console.log(error);
       if (!status) {
         fireToast("Something went wrong! Try again!", false);
       } else if (status == 400) {
@@ -460,14 +502,19 @@ const Ide = () => {
           submissionResult.compile +
           "\n" +
           submissionResult.stdout;
+
         setOutput(
           parseInt(submissionResult.statusId, 10) >= 6 ? errorFormat : okFormat
         );
+        setIsProcessing(false);
       } catch (error) {
-        setOutput("Error executing code.");
+        error === "Timeout"
+          ? setOutput("[Time Limit Exceeded]\nTime: 10.00s Memory: 0kb")
+          : setOutput("Error executing code.");
+        setIsProcessing(false);
+
         const status = error?.status;
         if (!status) {
-          // fireToast("Something went wrong! Try again!", false);
         } else if (status == 401 || status == 403) {
           navigate("/login", {
             state: { from: location },
@@ -488,6 +535,9 @@ const Ide = () => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      if (finalIntervalRef.current) {
+        clearInterval(finalIntervalRef.current);
       }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
