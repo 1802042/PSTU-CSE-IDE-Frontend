@@ -405,12 +405,8 @@ const Ide = () => {
 
         finalIntervalRef.current = setTimeout(() => {
           if (isProcessing) {
-            console.log("culprit <");
-
             if (intervalRef.current) clearInterval(intervalRef.current);
             reject(new Error("Timeout"));
-
-            console.log("culprit >");
           }
         }, 20000);
       } catch (err) {
@@ -506,12 +502,14 @@ const Ide = () => {
         setOutput(
           parseInt(submissionResult.statusId, 10) >= 6 ? errorFormat : okFormat
         );
+        setResultId(null);
         setIsProcessing(false);
       } catch (error) {
         error === "Timeout"
           ? setOutput("[Time Limit Exceeded]\nTime: 10.00s Memory: 0kb")
           : setOutput("Error executing code.");
         setIsProcessing(false);
+        setResultId(null);
 
         const status = error?.status;
         if (!status) {

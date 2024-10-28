@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, json } from "react-router-dom";
 import {
   PieChart,
   Pie,
@@ -19,6 +19,7 @@ import {
   mapLanguage,
   mapIdToLanguage,
   mapIdToVerdict,
+  mapUpperCaseLanguageId,
   VERDICT_COLORS,
   VERDICT_COLORS_SHORT,
 } from "../constants.js";
@@ -27,10 +28,7 @@ import DataTable from "./DataTable.jsx";
 import Pagination from "./Pagination.jsx";
 import useAuth from "../hooks/useAuth.js";
 
-const SUBMISSION_URL = "/submissions";
 const ANALYTICS_URL = "/submissions/analytics";
-const ANALYTICS_SUBMISSION_URL = "/submissions/analytics-submission";
-
 const LANGUAGES = ["C", "C++", "Java", "JavaScript", "Python"];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -49,13 +47,15 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const AdminDashboard = () => {
+export default function AdminDashboard() {
   const [data, setData] = useState([]);
   const [analytics, setAnalytics] = useState({});
   const [filter, setFilter] = useState({ language: "", status: "" });
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [startPage, setStartPage] = useState(1);
+  const [username, setUsername] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
   const rowsPerPage = 10;
   const { auth } = useAuth();
 
@@ -65,10 +65,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (auth.user?.role !== "admin") {
-      navigate("/not-found", {
-        state: { from: location },
-        replace: true,
-      });
+      navigate("/not-found", { state: { from: location }, replace: true });
     }
   }, [auth, navigate]);
 
@@ -86,108 +83,80 @@ const AdminDashboard = () => {
     });
   };
 
-  useEffect(() => {
+  const fetchData = async () => {
     let isMounted = true;
     const controller = new AbortController();
 
-    const getAnalytics = async () => {
-      try {
-        const response = await axiosPrivate.get(ANALYTICS_URL, {
-          withCredentials: true,
-          signal: controller.signal,
+    try {
+      console.log(mapUpperCaseLanguageId[filter.language]);
+      const analyticsResponse = await axiosPrivate.get(ANALYTICS_URL, {
+        withCredentials: true,
+        signal: controller.signal,
+        params: {
+          username,
+          languageId: mapUpperCaseLanguageId[filter.language],
+          // statusId: filter.status,
+          order: sortOrder == "asc" ? true : false,
+          page: currentPage,
+          count: rowsPerPage,
+        },
+      });
+
+      if (isMounted) {
+        setAnalytics({
+          language: analyticsResponse.data?.data?.language,
+          verdict: analyticsResponse.data?.data?.verdict,
         });
 
-        if (isMounted) {
-          setAnalytics(response.data.data);
-        }
-      } catch (err) {
-        if (isCanceled(err)) {
+        const transformedData = Object.entries(
+          analyticsResponse.data?.data?.submissions || {}
+        ).map(([key, item], i) => ({
+          id: (currentPage - 1) * rowsPerPage + i + 1,
+          date: format(new Date(item.createdAt), "PPpp"),
+          username: item.username,
+          record: (currentPage - 1) * rowsPerPage + i + 1,
+          language: mapLanguage[item.languageId],
+          status: item.status,
+          shared: Math.random() > 0.5,
+        }));
+        console.log(`data : ${JSON.stringify(transformedData)}`);
+        setData(transformedData);
+      }
+    } catch (err) {
+      console.log(`err ! : ${JSON.stringify(err)}`);
+      if (!isCanceled(err)) {
+        const status = err.response?.data?.status;
+        if (!status) {
+          fireToast("Something Went Wrong!");
+        } else if (status == "404") {
+          fireToast("Username not found!");
+        } else if (status == 401 || status == 403) {
+          navigate("/login", { state: { from: location }, replace: true });
+        } else if (status == "500") {
+          fireToast("Something Went Wrong When Logging! Try Again!");
         } else {
-          const status = err.response?.data?.status;
-          if (!status) {
-            fireToast("Something Went Wrong!");
-          } else if (status == "404") {
-            fireToast("username not found!");
-          } else if (status == 401 || status == 403) {
-            navigate("/login", {
-              state: { from: location },
-              replace: true,
-            });
-          } else if (status == "500") {
-            fireToast("Something Went Wrong When Logging! Try Again!");
-          } else {
-            fireToast("Something Went Wrong!");
-          }
+          fireToast("Something Went Wrong!");
         }
       }
-    };
-
-    getAnalytics();
+    }
 
     return () => {
       isMounted = false;
       controller.abort();
     };
-  }, []);
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const getSubmissions = async () => {
-      try {
-        const response = await axiosPrivate.get(ANALYTICS_SUBMISSION_URL, {
-          withCredentials: true,
-          signal: controller.signal,
-          params: {
-            page: currentPage,
-            count: rowsPerPage,
-          },
-        });
-
-        if (isMounted) {
-          const transformedData = response.data?.data.map((item, i) => ({
-            id: (currentPage - 1) * rowsPerPage + i + 1,
-            date: format(new Date(item.createdAt), "PPpp"),
-            username: item.username,
-            record: (currentPage - 1) * rowsPerPage + i + 1,
-            language: mapLanguage[item.languageId],
-            status: item.status,
-            shared: Math.random() > 0.5,
-          }));
-
-          setData(transformedData);
-        }
-      } catch (err) {
-        if (isCanceled(err)) {
-        } else {
-          const status = err.response?.data?.status;
-          if (!status) {
-            fireToast("Something Went Wrong!");
-          } else if (status == "400") {
-            fireToast("Wrong Query Params!");
-          } else if (status == "500") {
-          } else if (status == 401 || status == 403) {
-            navigate("/login", {
-              state: { from: location },
-              replace: true,
-            });
-          } else if (status == "500") {
-            fireToast("Something Went Wrong When Logging! Try Again!");
-          } else {
-            fireToast("Something Went Wrong!");
-          }
-        }
-      }
-    };
-
-    getSubmissions();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
+    fetchData();
   }, [currentPage]);
+
+  const handleSearch = () => {
+    fetchData();
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    setFilter((prev) => ({ ...prev, [filterType]: value }));
+  };
 
   const filteredData = data.filter(
     (item) =>
@@ -250,6 +219,33 @@ const AdminDashboard = () => {
   return (
     <div className="flex flex-col items-center bg-gray-800 text-gray-200 py-5 overflow-hidden">
       <div className="w-full max-w-7xl flex-1 overflow-auto">
+        <div className="mb-8 mt-4">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="flex items-center space-x-4">
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+                className="px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </div>
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Search
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="bg-gray-800 rounded-lg p-4">
             <h2 className="text-2xl font-bold mb-4 text-center">
@@ -327,10 +323,7 @@ const AdminDashboard = () => {
                   id="language-filter"
                   value={filter.language}
                   onChange={(e) =>
-                    setFilter((prev) => ({
-                      ...prev,
-                      language: e.target.value,
-                    }))
+                    handleFilterChange("language", e.target.value)
                   }
                   className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
@@ -352,9 +345,7 @@ const AdminDashboard = () => {
                 <select
                   id="status-filter"
                   value={filter.status}
-                  onChange={(e) =>
-                    setFilter((prev) => ({ ...prev, status: e.target.value }))
-                  }
+                  onChange={(e) => handleFilterChange("status", e.target.value)}
                   className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="">All Statuses</option>
@@ -400,6 +391,4 @@ const AdminDashboard = () => {
       </div>
     </div>
   );
-};
-
-export default AdminDashboard;
+}

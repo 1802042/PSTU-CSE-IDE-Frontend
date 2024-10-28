@@ -66,6 +66,14 @@ export const mapLanguage = {
   71: "Python",
 };
 
+export const mapUpperCaseLanguageId = {
+  C: "50",
+  "C++": "54",
+  Java: "62",
+  JavaScript: "63",
+  Python: "71",
+};
+
 export const mapLanguageId = {
   c: "50",
   cpp: "54",
