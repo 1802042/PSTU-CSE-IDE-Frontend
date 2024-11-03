@@ -104,13 +104,14 @@ npm run dev
 
 ## 🔧 Supported Languages
 
-| Language   | Version | Features                   |
-| ---------- | ------- | -------------------------- |
-| C++        | 17      | Full Standard Library      |
-| Python     | 3.8+    | Popular Packages Available |
-| Java       | 11      | Core Libraries             |
-| JavaScript | ES6+    | Node.js Runtime            |
-| C          | C11     | Standard Library Support   |
+| Language   
+| ---------- 
+| C   
+| C++        
+| Python     
+| Java
+| JavaScript
+    
 
 ## 📱 Contact
 
@@ -123,7 +124,7 @@ Dumki, Patuakhali - 8602
 ## 📞 Follow Us
 
 - [GitHub](https://github.com/1802042)
-- [LinkedIn](www.linkedin.com/in/rm1802042)
+- [LinkedIn](https://www.linkedin.com/in/rm1802042/)
 - [Facebook](https://www.facebook.com/knightshade.1802042/)
 
 ## 📄 License
